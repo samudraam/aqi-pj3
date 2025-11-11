@@ -41,7 +41,7 @@ const LandingPage = () => {
     const result = await fetchCityAirQuality(trimmedCity);
     if (result.success) {
       setErrorMessage(null);
-      navigate("/processing");
+      navigate("/mist");
       return;
     }
 
@@ -82,7 +82,7 @@ const LandingPage = () => {
           align="center"
           color="#ffffff"
           sx={{
-            fontWeight: 600,
+            fontWeight: 400,
             letterSpacing: 0.5,
           }}
         >
@@ -175,9 +175,9 @@ const LandingPage = () => {
               textTransform: "none",
               fontSize: "1rem",
               fontWeight: 600,
-              bgcolor: "#0f172a",
+              bgcolor: "#1c8c3a",
               "&:hover": {
-                bgcolor: "#1e293b",
+                bgcolor: "#0b521e",
               },
             }}
           >

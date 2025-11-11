@@ -2,8 +2,9 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { CssBaseline } from "@mui/material";
 import CityProvider from "./providers/city-provider";
 import LandingPage from "./features/landing/landing-page";
-import ProcessingPage from "./features/processing/processing-page";
-import ProcessingSuccessPage from "./features/processing/processing-success-page";
+import ExplorePage from "./features/processing/explore";
+import MistPage from "./features/processing/mist";
+import ExaminePage from "./features/processing/examine";
 
 /**
  * Application routing and providers.
@@ -14,8 +15,9 @@ const App = () => (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/processing" element={<ProcessingPage />} />
-        <Route path="/processing/success" element={<ProcessingSuccessPage />} />
+        <Route path="/mist" element={<MistPage />} />
+        <Route path="/mist/success" element={<ExplorePage />} />
+        <Route path="/examine" element={<ExaminePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

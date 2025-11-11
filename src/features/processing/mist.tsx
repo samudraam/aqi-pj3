@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 /**
  * AQI visualization screen with WebGL frosted glass camera effect.
  */
-const ProcessingPage = () => {
+const MistPage = () => {
   const { airQualityDetails } = useCity();
   const navigate = useNavigate();
   const [ctaVisible, setCtaVisible] = useState<boolean>(false);
@@ -25,7 +25,7 @@ const ProcessingPage = () => {
   }, []);
 
   const handleNavigateNext = useCallback(() => {
-    navigate("/processing/success");
+    navigate("/mist/success");
   }, [navigate]);
 
   return (
@@ -117,4 +117,4 @@ const ProcessingPage = () => {
   );
 };
 
-export default ProcessingPage;
+export default MistPage;
