@@ -37,7 +37,10 @@ const ProcessingSketch = () => {
       ? Math.min(Math.max(effectStrength, 0), 1)
       : 0.3;
 
-    const particleCount = Math.max(50, Math.round(targetCount ?? 150));
+    const particleCount = Math.min(
+      180,
+      Math.max(50, Math.round(targetCount ?? 150))
+    );
     const particleSpeed = 0.05 + strength * 0.35;
     const particleBrightness = 0.3 + strength * 0.7;
     const particleSize = 1.5 + strength * 3.0;
