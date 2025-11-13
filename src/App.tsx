@@ -6,6 +6,7 @@ import ExplorePage from "./features/processing/explore";
 import MistPage from "./features/processing/mist";
 import ExaminePage from "./features/processing/examine";
 import MorePage from "./features/processing/more";
+import MultiSketchPage from "./features/processing/multi-sketch";
 /**
  * Application routing and providers.
  */
@@ -19,6 +20,7 @@ const App = () => (
         <Route path="/mist/success" element={<ExplorePage />} />
         <Route path="/examine" element={<ExaminePage />} />
         <Route path="/more" element={<MorePage />} />
+        <Route path="/multi-sketch" element={<MultiSketchPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

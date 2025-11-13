@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Fab, Paper, Typography } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useCity } from "../../providers/use-city";
 import ProcessingSketch from "./processing-sketch";
 import { motion } from "framer-motion";
@@ -26,6 +27,10 @@ const MistPage = () => {
 
   const handleNavigateNext = useCallback(() => {
     navigate("/mist/success");
+  }, [navigate]);
+
+  const handleNavigatePrevious = useCallback(() => {
+    navigate("/");
   }, [navigate]);
 
   return (
@@ -55,7 +60,7 @@ const MistPage = () => {
             px: 3,
             py: 2,
             maxWidth: 400,
-            backgroundColor: "rgba(86, 200, 83, 0.95)",
+            backgroundColor: "rgba(101, 159, 65, 0.95)",
           }}
         >
           <Typography
@@ -71,6 +76,23 @@ const MistPage = () => {
           </Typography>
         </Paper>
       </motion.div>
+
+      <Fab
+        color="success"
+        aria-label="Go back"
+        onClick={handleNavigatePrevious}
+        sx={{
+          position: "absolute",
+          bottom: 24,
+          left: 24,
+          width: 72,
+          height: 72,
+          backgroundColor: "#659f41",
+          "&:hover": { backgroundColor: "#56C853" },
+        }}
+      >
+        <ArrowBackIcon sx={{ fontSize: 36 }} />
+      </Fab>
 
       <motion.div
         initial={{ opacity: 0, scale: 0 }}
@@ -92,7 +114,7 @@ const MistPage = () => {
           sx={{
             width: 72,
             height: 72,
-            backgroundColor: "#1c8c3a",
+            backgroundColor: "#659f41",
             "&:hover": { backgroundColor: "#56C853" },
           }}
         >

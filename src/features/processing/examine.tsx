@@ -10,7 +10,7 @@ import particleNO2 from "../../assets/particles-NO2.png";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
 
-type ParticleId = "pm10" | "pm25" | "o3" | "co2" | "no2";
+type ParticleId = "pm10" | "pm25" | "o3" | "co" | "no2";
 
 type ParticleMeta = {
   id: ParticleId;
@@ -54,12 +54,12 @@ const baseParticles: ParticleMeta[] = [
     image: particleO3,
   },
   {
-    id: "co2",
-    label: "Carbon Dioxide (CO₂)",
+    id: "co",
+    label: "Carbon Monoxide (CO)",
     description:
-      "Major greenhouse gas released by burning fossil fuels and biological processes.",
+      "Colorless, odorless, and toxic gas produced by incomplete combustion of fossil fuels and biomass.",
     healthImpact:
-      "High indoor levels lead to headaches and fatigue and indicate poor ventilation.",
+      "Exposure to high levels can cause headaches, dizziness, and impaired judgment. Can be fatal in high concentrations.",
     image: particleCO2,
   },
   {
@@ -269,12 +269,12 @@ const ExaminePage = () => {
         </Paper>
       </motion.div>
       <motion.div
-      style={{
-        position: "absolute",
-        bottom: 32,
-        right: 32,
-        pointerEvents: "auto",
-      }}
+        style={{
+          position: "absolute",
+          bottom: 32,
+          right: 32,
+          pointerEvents: "auto",
+        }}
       >
         <Fab
           color="success"

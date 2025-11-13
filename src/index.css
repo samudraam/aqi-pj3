@@ -10,6 +10,14 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Fonts */
+@font-face {
+  font-family: 'Alloy Ink';
+  src: url('./assets/font/AlloyInk.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 * {
   box-sizing: border-box;
 }

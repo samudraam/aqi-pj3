@@ -24,7 +24,7 @@ const ProcessingSketch = () => {
     const defaultConfig = {
       particleCount: 150,
       particleSpeed: 0.15,
-      particleBrightness: 0.8,
+      particleBrightness: 1,
       particleSize: 2.5,
     };
 
@@ -42,8 +42,8 @@ const ProcessingSketch = () => {
       Math.max(50, Math.round(targetCount ?? 150))
     );
     const particleSpeed = 0.05 + strength * 0.35;
-    const particleBrightness = 0.3 + strength * 0.7;
-    const particleSize = 1.5 + strength * 3.0;
+    const particleBrightness = 0.5 + strength * 0.7;
+    const particleSize = 4.5 + strength * 3.0;
 
     return {
       particleCount,
@@ -466,28 +466,6 @@ const ProcessingSketch = () => {
 
       s.windowResized = () => {
         s.resizeCanvas(s.windowWidth, s.windowHeight);
-
-        lowResW = Math.floor(s.width / DOWNSAMPLE);
-        lowResH = Math.floor(s.height / DOWNSAMPLE);
-
-        pgLowA.remove();
-        pgLowB.remove();
-        pgTemp.remove();
-        maskG.remove();
-
-        pgLowA = s.createGraphics(lowResW, lowResH, s.WEBGL);
-        pgLowB = s.createGraphics(lowResW, lowResH, s.WEBGL);
-        pgLowA.pixelDensity(1);
-        pgLowB.pixelDensity(1);
-
-        pgTemp = s.createGraphics(s.width, s.height, s.WEBGL);
-        pgTemp.pixelDensity(1);
-
-        maskG = s.createGraphics(s.width, s.height);
-        maskG.pixelDensity(1);
-        resetMask();
-
-        initParticles();
       };
     };
 

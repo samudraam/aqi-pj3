@@ -4,13 +4,14 @@ import { motion, useInView } from "framer-motion";
 import {
   Alert,
   Box,
-  Button,
   CircularProgress,
-  TextField,
+  IconButton,
+  InputBase,
   Typography,
 } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useCity } from "../../providers/use-city";
-
+import grass from "../../assets/grass.png";
 /**
  * Landing hero for city search.
  */
@@ -59,7 +60,10 @@ const LandingPage = () => {
         alignItems: "center",
         justifyContent: "center",
         px: 2,
-        bgcolor: "#56c853",
+        backgroundImage: `url(${grass})`,
+        backgroundSize: { xs: "320%", sm: "105%" },
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
       }}
     >
       <Box
@@ -68,7 +72,7 @@ const LandingPage = () => {
         noValidate
         sx={{
           width: "100%",
-          maxWidth: 520,
+          maxWidth: 900,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -80,13 +84,14 @@ const LandingPage = () => {
           component="h1"
           variant="h4"
           align="center"
-          color="#ffffff"
+          color="#000000"
           sx={{
             fontWeight: 400,
             letterSpacing: 0.5,
+            pb: { xs: 2, sm: 8 },
           }}
         >
-          {Array.from("Learn more about your city!").map((letter, index) => (
+          {Array.from("Learn about").map((letter, index) => (
             <motion.span
               key={`${letter}-${index}`}
               initial={{ opacity: 0 }}
@@ -97,97 +102,89 @@ const LandingPage = () => {
             </motion.span>
           ))}
         </Typography>
-        <TextField
-          aria-label="City search input"
-          placeholder="Search for a city"
-          value={cityQuery}
-          onChange={handleCityChange}
-          fullWidth
-          variant="outlined"
-          inputProps={{
-            tabIndex: 0,
-          }}
-          error={Boolean(errorMessage)}
-          helperText={errorMessage ?? " "}
-          FormHelperTextProps={{
-            sx: { textAlign: "center", color: "#fef2f2" },
-          }}
+        <Box
           sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 9999,
-              backgroundColor: "#ffffff",
-              fontSize: "1.125rem",
-              px: 2,
-            },
-            "& .MuiOutlinedInput-input": {
-              py: 1.25,
-            },
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#d1d5db",
-            },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#93c5fd",
-            },
-            "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
-              {
-                borderColor: "#2563eb",
-              },
+            width: "100%",
+            maxWidth: 800,
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            borderBottom: "4px solid rgb(0, 0, 0)",
+            pb: 1.5,
           }}
-        />
+        >
+          <InputBase
+            value={cityQuery}
+            onChange={handleCityChange}
+            placeholder="Your city"
+            autoFocus
+            fullWidth
+            inputProps={{
+              "aria-label": "City search input",
+              style: {
+                textTransform: "uppercase",
+                textAlign: "center",
+                fontWeight: 400,
+                letterSpacing: 1,
+                fontFamily: "'Alloy Ink', sans-serif",
+              },
+            }}
+            sx={{
+              flex: 1,
+              fontSize: { xs: "2rem", sm: "6.75rem" },
+              textAlign: "center",
+              fontWeight: 700,
+              letterSpacing: 3,
+              textTransform: "uppercase",
+              color: "#000000",
+              fontFamily: "'Alloy Ink', sans-serif",
+              "& input::placeholder": {
+                color: "rgba(0, 0, 0)",
+                opacity: 1,
+                fontFamily: "'Alloy Ink', sans-serif",
+              },
+            }}
+          />
+          <IconButton
+            type="submit"
+            aria-label="Submit city search"
+            disabled={!isSubmitVisible || isFetching}
+            sx={{
+              border: "5px solid rgb(0, 0, 0)",
+              width: 86,
+              height: 86,
+              color: "#000000",
+              "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.08)" },
+            }}
+          >
+            {isFetching ? (
+              <CircularProgress size={24} sx={{ color: "#000000" }} />
+            ) : (
+              <ArrowForwardIcon sx={{ color: "#000000", fontSize: { xs: "2rem", sm: "3.75rem" }}} />
+            )}
+          </IconButton>
+        </Box>
+        <Typography
+          variant="body2"
+          sx={{ color: "#000000", letterSpacing: 1, mt: -1 }}
+        >
+          Enter to complete
+        </Typography>
         {errorMessage && (
           <Alert
             severity="error"
             sx={{
               width: "100%",
+              maxWidth: 420,
               borderRadius: 3,
               bgcolor: "rgba(239, 68, 68, 0.85)",
               color: "#ffffff",
+              mt: 1,
             }}
           >
             {errorMessage}
           </Alert>
         )}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{
-            opacity: isSubmitVisible ? 1 : 0,
-            y: isSubmitVisible ? 0 : 8,
-          }}
-          transition={{ duration: 0.3 }}
-          style={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            pointerEvents: isSubmitVisible ? "auto" : "none",
-          }}
-        >
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            aria-label="Submit city search"
-            tabIndex={isSubmitVisible ? 0 : -1}
-            disabled={!isSubmitVisible || isFetching}
-            sx={{
-              px: 4,
-              py: 1.5,
-              borderRadius: 9999,
-              textTransform: "none",
-              fontSize: "1rem",
-              fontWeight: 600,
-              bgcolor: "#1c8c3a",
-              "&:hover": {
-                bgcolor: "#0b521e",
-              },
-            }}
-          >
-            {isFetching ? (
-              <CircularProgress size={22} color="inherit" />
-            ) : (
-              "Submit"
-            )}
-          </Button>
-        </motion.div>
       </Box>
     </Box>
   );

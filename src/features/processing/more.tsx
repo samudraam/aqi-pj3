@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 const MorePage = () => {
   const navigate = useNavigate();
   const handleNavigateNext = useCallback(() => {
-    navigate("/examine");
+    navigate("/multi-sketch");
   }, [navigate]);
 
   return (
