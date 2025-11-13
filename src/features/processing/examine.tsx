@@ -2,11 +2,11 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import { Box, Typography, Paper, Chip, Fab } from "@mui/material";
 import { motion } from "framer-motion";
 import magnifierSrc from "../../assets/magnifier.png";
-import particleO3 from "../../assets/particles_O3.png";
-import particlePM25 from "../../assets/particles_PM2.5.png";
-import particlePM10 from "../../assets/particles_PM10.png";
-import particleCO2 from "../../assets/particles-C02.png";
-import particleNO2 from "../../assets/particles-NO2.png";
+import particleO3 from "/particles_O3.png";
+import particlePM25 from "/particles_PM2.5.png";
+import particlePM10 from "/particles_PM10.png";
+import particleCO2 from "/particles-C02.png";
+import particleNO2 from "/particles-NO2.png";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
 

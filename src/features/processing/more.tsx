@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 const MorePage = () => {
   const navigate = useNavigate();
   const handleNavigateNext = useCallback(() => {
-    navigate("/multi-sketch");
+    navigate("/particles-debug");
   }, [navigate]);
 
   return (

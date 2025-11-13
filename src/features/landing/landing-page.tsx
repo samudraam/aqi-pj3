@@ -131,7 +131,7 @@ const LandingPage = () => {
             }}
             sx={{
               flex: 1,
-              fontSize: { xs: "2rem", sm: "6.75rem" },
+              fontSize: { xs: "5rem", sm: "6.75rem" },
               textAlign: "center",
               fontWeight: 700,
               letterSpacing: 3,

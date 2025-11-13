@@ -12,6 +12,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useCity } from "../../providers/use-city";
 import ProcessingSketch from "./processing-sketch";
 import CostSketch from "./cost-sketch";
+import ParticlesSketch from "./particles-sketch-2";
 
 type VisualizationMode = "visibility" | "particles" | "cost";
 
@@ -24,6 +25,7 @@ interface ModeConfig {
 const VISUALIZATION_MODES: ModeConfig[] = [
   { id: "visibility", label: "Visibility Mode", component: ProcessingSketch },
   { id: "cost", label: "Cost Mode", component: CostSketch },
+  { id: "particles", label: "Particles Mode", component: ParticlesSketch },
 ];
 
 /**
