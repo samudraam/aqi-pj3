@@ -14,7 +14,7 @@ interface Particle {
 /**
  * WebGL frosted glass camera effect with AQI-driven particles.
  */
-const ProcessingSketch = () => {
+const ProcessingSketch2 = () => {
   const sketchRef = useRef<HTMLDivElement | null>(null);
   const { airQualityDetails } = useCity();
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -111,8 +111,9 @@ const ProcessingSketch = () => {
         const REFRACT_AMT = 0.1;
         const GRAIN_AMT = 0.01;
         const DESAT_AMT = 0.1;
-        const BRUSH_SIZE = 80;
-        const BRUSH_STRENGTH = 0.3;
+        // comment out brush size and strength
+        // const BRUSH_SIZE = 80;
+        // const BRUSH_STRENGTH = 0.3;
 
         let cam: p5.MediaElement | null = null;
         let camReady = false;
@@ -219,13 +220,14 @@ const ProcessingSketch = () => {
           maskG.background(255);
         };
 
-        const paintReveal = (x: number, y: number) => {
-          maskG.push();
-          maskG.noStroke();
-          maskG.fill(0, 0, 0, BRUSH_STRENGTH * 255);
-          maskG.circle(x, y, BRUSH_SIZE);
-          maskG.pop();
-        };
+        // comment out paining 
+        // const paintReveal = (x: number, y: number) => {
+        //   maskG.push();
+        //   maskG.noStroke();
+        //   maskG.fill(0, 0, 0, BRUSH_STRENGTH * 255);
+        //   maskG.circle(x, y, BRUSH_SIZE);
+        //   maskG.pop();
+        // };
 
         const compileShaders = () => {
           const vertSrc = `
@@ -525,17 +527,18 @@ const ProcessingSketch = () => {
           s.pop();
         };
 
-        s.mouseDragged = () => {
-          paintReveal(s.mouseX, s.mouseY);
-          return false;
-        };
+        // remove drag to reveal feature
+        // s.mouseDragged = () => {
+        //   paintReveal(s.mouseX, s.mouseY);
+        //   return false;
+        // };
 
-        s.touchMoved = () => {
-          for (const touch of s.touches as Array<{ x: number; y: number }>) {
-            paintReveal(touch.x, touch.y);
-          }
-          return false;
-        };
+        // s.touchMoved = () => {
+        //   for (const touch of s.touches as Array<{ x: number; y: number }>) {
+        //     paintReveal(touch.x, touch.y);
+        //   }
+        //   return false;
+        // };
 
         s.keyPressed = () => {
           if (s.key === "r" || s.key === "R") {
@@ -599,4 +602,4 @@ const ProcessingSketch = () => {
   );
 };
 
-export default ProcessingSketch;
+export default ProcessingSketch2;

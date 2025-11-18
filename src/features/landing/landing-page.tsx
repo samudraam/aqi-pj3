@@ -166,9 +166,9 @@ const LandingPage = () => {
         </Box>
         <Typography
           variant="body2"
-          sx={{ color: "#000000", letterSpacing: 1, mt: -1 }}
+          sx={{ color: "#000000", fontSize: {xs:"1rem" , sm: "1.2rem"},letterSpacing: 1, mt: -1 }}
         >
-          Enter to complete
+          Enter a city
         </Typography>
         {errorMessage && (
           <Alert

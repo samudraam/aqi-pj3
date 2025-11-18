@@ -192,7 +192,11 @@ class ParticleShape {
   }
 }
 
-const ParticlesSketch2 = () => {
+interface ParticlesSketch2Props {
+  showControls?: boolean;
+}
+
+const ParticlesSketch2 = ({ showControls = true }: ParticlesSketch2Props) => {
   const {
     airQualityDetails,
     fetchCityAirQuality,
@@ -750,156 +754,161 @@ const ParticlesSketch2 = () => {
           pointerEvents: "none", // let clicks pass through if you want
         }}
       />
-      <div
-        style={{
-          position: "fixed",
-          top: "1rem",
-          left: "1rem",
-          width: "min(360px, calc(100vw - 2rem))",
-          background: "rgba(6, 12, 30, 0.78)",
-          color: "#f0f4f8",
-          padding: "1rem",
-          borderRadius: "0.75rem",
-          pointerEvents: "auto",
-          zIndex: 12,
-          boxShadow: "0 12px 35px rgba(0, 0, 0, 0.4)",
-          backdropFilter: "blur(10px)",
-        }}
-      >
-        <form
-          onSubmit={handleFetchCity}
-          style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+      {showControls && (
+        <div
+          style={{
+            position: "fixed",
+            top: "1rem",
+            left: "1rem",
+            width: "min(360px, calc(100vw - 2rem))",
+            background: "rgba(6, 12, 30, 0.78)",
+            color: "#f0f4f8",
+            padding: "1rem",
+            borderRadius: "0.75rem",
+            pointerEvents: "auto",
+            zIndex: 12,
+            boxShadow: "0 12px 35px rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(10px)",
+          }}
         >
-          <label
-            htmlFor="city-context-input"
-            style={{ fontSize: "0.85rem", letterSpacing: "0.04em" }}
+          <form
+            onSubmit={handleFetchCity}
+            style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
           >
-            Set city context
-          </label>
-          <input
-            id="city-context-input"
-            type="text"
-            placeholder="e.g. Los Angeles"
-            value={cityInput}
-            onChange={(event) => setCityInput(event.target.value)}
-            style={{
-              borderRadius: "0.5rem",
-              border: "1px solid rgba(255,255,255,0.25)",
-              padding: "0.5rem 0.75rem",
-              fontSize: "1rem",
-              background: "rgba(255,255,255,0.08)",
-              color: "#f0f4f8",
-            }}
-          />
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button
-              type="submit"
-              disabled={isFetching}
-              style={{
-                flex: 1,
-                border: "none",
-                borderRadius: "0.5rem",
-                padding: "0.45rem 0.75rem",
-                fontWeight: 600,
-                background: "#3b82f6",
-                color: "#ffffff",
-                cursor: isFetching ? "not-allowed" : "pointer",
-                opacity: isFetching ? 0.7 : 1,
-              }}
+            <label
+              htmlFor="city-context-input"
+              style={{ fontSize: "0.85rem", letterSpacing: "0.04em" }}
             >
-              {isFetching ? "Loading…" : "Load city"}
-            </button>
-            <button
-              type="button"
-              onClick={handleResetCity}
-              disabled={isFetching && !airQualityDetails}
+              Set city context
+            </label>
+            <input
+              id="city-context-input"
+              type="text"
+              placeholder="e.g. Los Angeles"
+              value={cityInput}
+              onChange={(event) => setCityInput(event.target.value)}
               style={{
-                flex: 0.8,
-                border: "1px solid rgba(255,255,255,0.35)",
                 borderRadius: "0.5rem",
-                padding: "0.45rem 0.75rem",
-                background: "transparent",
+                border: "1px solid rgba(255,255,255,0.25)",
+                padding: "0.5rem 0.75rem",
+                fontSize: "1rem",
+                background: "rgba(255,255,255,0.08)",
                 color: "#f0f4f8",
-                cursor:
-                  isFetching && !airQualityDetails ? "not-allowed" : "pointer",
-                opacity: isFetching && !airQualityDetails ? 0.6 : 1,
               }}
-            >
-              Clear
-            </button>
-          </div>
-        </form>
-        {(statusMessage || isFetching) && (
-          <p
-            style={{
-              marginTop: "0.5rem",
-              fontSize: "0.85rem",
-              color: "#cbd5f5",
-            }}
-          >
-            {isFetching ? "Fetching latest data…" : statusMessage}
-          </p>
-        )}
-        <div style={{ marginTop: "0.75rem", fontSize: "0.85rem" }}>
-          <strong style={{ fontSize: "0.9rem", letterSpacing: "0.05em" }}>
-            City context
-          </strong>
-          {airQualityDetails ? (
-            <>
-              <div style={{ marginTop: "0.35rem" }}>
-                <span style={{ color: "#9fb5ff" }}>City:</span>{" "}
-                {airQualityDetails.cityName}
-              </div>
-              <div>
-                <span style={{ color: "#9fb5ff" }}>Region:</span>{" "}
-                {[airQualityDetails.state, airQualityDetails.country]
-                  .filter(Boolean)
-                  .join(", ") || "N/A"}
-              </div>
-              <div>
-                <span style={{ color: "#9fb5ff" }}>AQI:</span>{" "}
-                {airQualityDetails.aqi ?? "N/A"} ({airQualityDetails.aqiLabel})
-              </div>
-              <div>
-                <span style={{ color: "#9fb5ff" }}>Particles:</span>{" "}
-                {airQualityDetails.targetCount}
-              </div>
-              <div>
-                <span style={{ color: "#9fb5ff" }}>Coords:</span>{" "}
-                {airQualityDetails.latitude.toFixed(2)},{" "}
-                {airQualityDetails.longitude.toFixed(2)}
-              </div>
-              <div
+            />
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <button
+                type="submit"
+                disabled={isFetching}
                 style={{
-                  marginTop: "0.6rem",
-                  padding: "0.5rem",
+                  flex: 1,
+                  border: "none",
                   borderRadius: "0.5rem",
-                  background: "rgba(255,255,255,0.05)",
-                  maxHeight: "180px",
-                  overflow: "auto",
+                  padding: "0.45rem 0.75rem",
+                  fontWeight: 600,
+                  background: "#3b82f6",
+                  color: "#ffffff",
+                  cursor: isFetching ? "not-allowed" : "pointer",
+                  opacity: isFetching ? 0.7 : 1,
                 }}
               >
-                <pre
-                  style={{
-                    margin: 0,
-                    fontSize: "0.75rem",
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                    fontFamily:
-                      '"JetBrains Mono", "Fira Code", "SFMono-Regular", monospace',
-                  }}
-                >
-                  {JSON.stringify(airQualityDetails, null, 2)}
-                </pre>
-              </div>
-            </>
-          ) : (
-            <p style={{ marginTop: "0.35rem", color: "#cbd5f5" }}>
-              Load a city to display the sketch context.
+                {isFetching ? "Loading…" : "Load city"}
+              </button>
+              <button
+                type="button"
+                onClick={handleResetCity}
+                disabled={isFetching && !airQualityDetails}
+                style={{
+                  flex: 0.8,
+                  border: "1px solid rgba(255,255,255,0.35)",
+                  borderRadius: "0.5rem",
+                  padding: "0.45rem 0.75rem",
+                  background: "transparent",
+                  color: "#f0f4f8",
+                  cursor:
+                    isFetching && !airQualityDetails
+                      ? "not-allowed"
+                      : "pointer",
+                  opacity: isFetching && !airQualityDetails ? 0.6 : 1,
+                }}
+              >
+                Clear
+              </button>
+            </div>
+          </form>
+          {(statusMessage || isFetching) && (
+            <p
+              style={{
+                marginTop: "0.5rem",
+                fontSize: "0.85rem",
+                color: "#cbd5f5",
+              }}
+            >
+              {isFetching ? "Fetching latest data…" : statusMessage}
             </p>
           )}
+          <div style={{ marginTop: "0.75rem", fontSize: "0.85rem" }}>
+            <strong style={{ fontSize: "0.9rem", letterSpacing: "0.05em" }}>
+              City context
+            </strong>
+            {airQualityDetails ? (
+              <>
+                <div style={{ marginTop: "0.35rem" }}>
+                  <span style={{ color: "#9fb5ff" }}>City:</span>{" "}
+                  {airQualityDetails.cityName}
+                </div>
+                <div>
+                  <span style={{ color: "#9fb5ff" }}>Region:</span>{" "}
+                  {[airQualityDetails.state, airQualityDetails.country]
+                    .filter(Boolean)
+                    .join(", ") || "N/A"}
+                </div>
+                <div>
+                  <span style={{ color: "#9fb5ff" }}>AQI:</span>{" "}
+                  {airQualityDetails.aqi ?? "N/A"} ({airQualityDetails.aqiLabel}
+                  )
+                </div>
+                <div>
+                  <span style={{ color: "#9fb5ff" }}>Particles:</span>{" "}
+                  {airQualityDetails.targetCount}
+                </div>
+                <div>
+                  <span style={{ color: "#9fb5ff" }}>Coords:</span>{" "}
+                  {airQualityDetails.latitude.toFixed(2)},{" "}
+                  {airQualityDetails.longitude.toFixed(2)}
+                </div>
+                <div
+                  style={{
+                    marginTop: "0.6rem",
+                    padding: "0.5rem",
+                    borderRadius: "0.5rem",
+                    background: "rgba(255,255,255,0.05)",
+                    maxHeight: "180px",
+                    overflow: "auto",
+                  }}
+                >
+                  <pre
+                    style={{
+                      margin: 0,
+                      fontSize: "0.75rem",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                      fontFamily:
+                        '"JetBrains Mono", "Fira Code", "SFMono-Regular", monospace',
+                    }}
+                  >
+                    {JSON.stringify(airQualityDetails, null, 2)}
+                  </pre>
+                </div>
+              </>
+            ) : (
+              <p style={{ marginTop: "0.35rem", color: "#cbd5f5" }}>
+                Load a city to display the sketch context.
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
       {cameraError && (
         <div
           style={{
@@ -916,7 +925,7 @@ const ParticlesSketch2 = () => {
           {cameraError}
         </div>
       )}
-      {!airQualityDetails && !cameraError && (
+      {showControls && !airQualityDetails && !cameraError && (
         <div
           style={{
             position: "fixed",
