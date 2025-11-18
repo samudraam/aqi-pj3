@@ -107,10 +107,10 @@ const ProcessingSketch2 = () => {
 
       const sketch = (s: p5) => {
         const DOWNSAMPLE = 2;
-        const BLUR_RADIUS = 5;
-        const REFRACT_AMT = 0.1;
-        const GRAIN_AMT = 0.01;
-        const DESAT_AMT = 0.1;
+        const BLUR_RADIUS = 8;
+        const REFRACT_AMT = 0.5;
+        const GRAIN_AMT = 0;
+        const DESAT_AMT = 0.2;
         // comment out brush size and strength
         // const BRUSH_SIZE = 80;
         // const BRUSH_STRENGTH = 0.3;
@@ -270,9 +270,9 @@ const ProcessingSketch2 = () => {
             vec2 texelSize = 1.0 / resolution;
             vec4 result = vec4(0.0);
             float totalWeight = 0.0;
-            float sigma = 2.5;
+            float sigma = 3.0; //increase blur radius
             
-            for(int i = -4; i <= 4; i++) {
+            for(int i = -6; i <= 6; i++) { //increase blur radius
               float weight = gaussianWeight(float(i), sigma);
               vec2 offset = vec2(float(i) * radius * texelSize.x, 0.0);
               result += texture2D(tex, uv + offset) * weight;
@@ -299,9 +299,9 @@ const ProcessingSketch2 = () => {
             vec2 texelSize = 1.0 / resolution;
             vec4 result = vec4(0.0);
             float totalWeight = 0.0;
-            float sigma = 2.5;
+            float sigma = 3.0; //increase blur radius
             
-            for(int i = -4; i <= 4; i++) {
+            for(int i = -6; i <= 6; i++) { //increase blur radius
               float weight = gaussianWeight(float(i), sigma);
               vec2 offset = vec2(0.0, float(i) * radius * texelSize.y);
               result += texture2D(tex, uv + offset) * weight;
