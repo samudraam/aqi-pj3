@@ -16,7 +16,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ProcessingSketch2 from "./processing-sketch-2";
+import ProcessingSketch2 from "./processing-sketch-3";
 import ParticlesSketch3 from "./particles-sketch-3";
 import { useCity } from "../../providers/use-city";
 

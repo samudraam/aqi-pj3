@@ -23,6 +23,11 @@ const MIN_AQI_INDEX = 1;
 const MAX_AQI_INDEX = 5;
 const MIN_BLUR_RADIUS = 4;
 const MAX_BLUR_RADIUS = 18;
+const SWIPE_RADIUS = 140;
+const SWIPE_STRENGTH = 6;
+const SWIPE_DECAY_MS = 240;
+const SWIPE_SPEED_SCALE = 22;
+const SWIPE_MIN_DELTA = 1.5;
 
 /**
  * WebGL frosted glass camera effect with AQI-driven particles.
@@ -155,6 +160,17 @@ const ProcessingSketch2 = () => {
         let particleShader: p5.Shader;
 
         let particles: Particle[] = [];
+        const pointerTrail: Array<{
+          x: number;
+          y: number;
+          dx: number;
+          dy: number;
+          t: number;
+        }> = [];
+        let lastPointer: {
+          x: number;
+          y: number;
+        } | null = null;
 
         const initParticles = () => {
           particles = [];
@@ -171,8 +187,53 @@ const ProcessingSketch2 = () => {
           }
         };
 
+        const applySwipeForce = (p: Particle, now: number) => {
+          if (pointerTrail.length === 0) {
+            return;
+          }
+
+          let fx = 0;
+          let fy = 0;
+          for (let i = pointerTrail.length - 1; i >= 0; i -= 1) {
+            const trail = pointerTrail[i];
+            if (now - trail.t > SWIPE_DECAY_MS) {
+              continue;
+            }
+
+            const dx = p.x - trail.x;
+            const dy = p.y - trail.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq <= 0 || distSq > SWIPE_RADIUS * SWIPE_RADIUS) {
+              continue;
+            }
+
+            const dist = Math.sqrt(distSq);
+            const falloff = 1 - dist / SWIPE_RADIUS;
+            const speed = Math.min(
+              Math.sqrt(trail.dx * trail.dx + trail.dy * trail.dy) /
+                SWIPE_SPEED_SCALE,
+              1
+            );
+            const magnitude = SWIPE_STRENGTH * speed * falloff * falloff;
+            const invDist = 1 / dist;
+            fx += dx * invDist * magnitude;
+            fy += dy * invDist * magnitude;
+          }
+
+          p.x += fx;
+          p.y += fy;
+        };
+
         const updateParticles = () => {
           const time = s.millis() / 1000.0;
+          const now = s.millis();
+          while (
+            pointerTrail.length > 0 &&
+            now - pointerTrail[0].t > SWIPE_DECAY_MS
+          ) {
+            pointerTrail.shift();
+          }
+
           for (const p of particles) {
             const noiseX = s.noise(
               p.noiseOffsetX + time * sketchConfig.particleSpeed
@@ -184,6 +245,7 @@ const ProcessingSketch2 = () => {
             const vy = (noiseY - 0.5) * 2.0;
             p.x += vx * 0.5;
             p.y += vy * 0.5;
+            applySwipeForce(p, now);
             if (p.x < 0) p.x = s.width;
             if (p.x > s.width) p.x = 0;
             if (p.y < 0) p.y = s.height;
@@ -552,18 +614,51 @@ const ProcessingSketch2 = () => {
           s.pop();
         };
 
-        // remove drag to reveal feature
-        // s.mouseDragged = () => {
-        //   paintReveal(s.mouseX, s.mouseY);
-        //   return false;
-        // };
+        const recordPointer = (x: number, y: number) => {
+          const now = s.millis();
+          if (lastPointer) {
+            const dx = x - lastPointer.x;
+            const dy = y - lastPointer.y;
+            if (
+              Math.abs(dx) > SWIPE_MIN_DELTA ||
+              Math.abs(dy) > SWIPE_MIN_DELTA
+            ) {
+              pointerTrail.push({ x, y, dx, dy, t: now });
+              lastPointer = { x, y };
+            }
+          } else {
+            lastPointer = { x, y };
+          }
+        };
 
-        // s.touchMoved = () => {
-        //   for (const touch of s.touches as Array<{ x: number; y: number }>) {
-        //     paintReveal(touch.x, touch.y);
-        //   }
-        //   return false;
-        // };
+        const clearPointer = () => {
+          pointerTrail.length = 0;
+          lastPointer = null;
+        };
+
+        s.mouseMoved = () => {
+          recordPointer(s.mouseX, s.mouseY);
+          return false;
+        };
+        s.mouseDragged = () => {
+          recordPointer(s.mouseX, s.mouseY);
+          return false;
+        };
+        s.mouseReleased = () => {
+          clearPointer();
+          return false;
+        };
+
+        s.touchMoved = () => {
+          for (const touch of s.touches as Array<{ x: number; y: number }>) {
+            recordPointer(touch.x, touch.y);
+          }
+          return false;
+        };
+        s.touchEnded = () => {
+          clearPointer();
+          return false;
+        };
 
         s.keyPressed = () => {
           if (s.key === "r" || s.key === "R") {
