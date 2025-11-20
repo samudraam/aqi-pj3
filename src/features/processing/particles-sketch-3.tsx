@@ -89,6 +89,20 @@ const POL_COLORS: Record<PollutantKey, string> = {
   no2: "#bf616a",
 };
 
+const POLLUTANT_LABELS: Record<PollutantKey, string> = {
+  o3: "Ozone (O₃)",
+  pm2_5: "PM2.5",
+  pm10: "PM10",
+  co: "Carbon Monoxide (CO)",
+  no2: "Nitrogen Dioxide (NO₂)",
+};
+
+const LENS_HIGHLIGHT_GROWTH = 1.45;
+const LENS_ALPHA_BOOST = 70;
+const LENS_COLOR_BLEND = 0.65;
+const LENS_DESATURATE_FACTOR = 0.35;
+const LENS_LABEL_DURATION = 180;
+
 const AQI_PALETTES: Record<number, string[]> = {
   1: ["#7ef9a3", "#66e592", "#4fd380", "#3bbf70", "#2aa65c"],
   2: ["#a6f08e", "#dbf76a", "#a1e87a", "#8bd66a", "#72c15a"],
@@ -116,6 +130,8 @@ class ParticleShape {
   alpha: number;
   rot: number;
   rotSpeed: number;
+  highlightProgress: number;
+  labelTimer: number;
 
   constructor(
     s: p5,
@@ -137,6 +153,8 @@ class ParticleShape {
     this.alpha = 160 + 80 * norm;
     this.rot = s.random(s.TWO_PI);
     this.rotSpeed = s.random(-0.01, 0.01) * (0.4 + effectStrength);
+    this.highlightProgress = 0;
+    this.labelTimer = 0;
   }
 
   update(
@@ -174,22 +192,40 @@ class ParticleShape {
   display(
     s: p5,
     images: Record<PollutantKey, p5.Image | undefined>,
-    effectStrength: number
+    effectStrength: number,
+    lensActive: boolean
   ) {
     const n = s.noise(this.noiseOffset.x * 0.7 + this.noiseOffset.y * 0.3);
-    const sz = this.size + n * 2 * (0.5 + effectStrength);
+    const baseSize = this.size + n * 2 * (0.5 + effectStrength);
+    const growth = 1 + this.highlightProgress * (LENS_HIGHLIGHT_GROWTH - 1);
+    const sz = baseSize * growth;
+    const pollutantColor = s.color(POL_COLORS[this.pollutant]);
+    const neutralColor = s.color("#dfe4ee");
+    const tintColor = s.lerpColor(
+      neutralColor,
+      pollutantColor,
+      Math.min(1, LENS_COLOR_BLEND * this.highlightProgress + 0.05)
+    );
+    const desaturationMultiplier =
+      this.highlightProgress > 0.02
+        ? 1
+        : lensActive
+        ? LENS_DESATURATE_FACTOR
+        : 1;
+    const alpha =
+      this.alpha * desaturationMultiplier +
+      this.highlightProgress * LENS_ALPHA_BOOST;
     const img = images[this.pollutant];
 
     if (img) {
       s.push();
       s.translate(this.pos.x, this.pos.y);
       s.rotate(this.rot);
-      s.tint(255, this.alpha);
+      s.tint(s.red(tintColor), s.green(tintColor), s.blue(tintColor), alpha);
       s.image(img, 0, 0, sz, sz);
       s.pop();
     } else {
-      const c = s.color(POL_COLORS[this.pollutant]);
-      s.fill(s.red(c), s.green(c), s.blue(c), this.alpha);
+      s.fill(s.red(tintColor), s.green(tintColor), s.blue(tintColor), alpha);
       s.ellipse(this.pos.x, this.pos.y, sz, sz);
     }
   }
@@ -638,6 +674,15 @@ const ParticlesSketch3 = ({ showControls = true }: ParticlesSketch3Props) => {
         if (s.frameCount === 1 || s.frameCount === 30) {
           console.log("IMG in draw", IMG, "imagesLoaded:", imagesLoaded);
         }
+        const pointerX = s.mouseX;
+        const pointerY = s.mouseY;
+        const lensActive =
+          pointerX >= 0 &&
+          pointerX <= s.width &&
+          pointerY >= 0 &&
+          pointerY <= s.height;
+        const lensRadius = Math.min(s.width, s.height) * 0.18;
+        const lensRadiusSq = lensRadius * lensRadius;
         // COMMENTED OUT: Camera background check and webcam background
         // if (!camReady || !cam) {
         //   s.background(20);
@@ -697,7 +742,58 @@ const ParticlesSketch3 = ({ showControls = true }: ParticlesSketch3Props) => {
           //   }
           // }
 
-          sh.display(s, IMG, effectStrength);
+          if (lensActive) {
+            const dx = pointerX - sh.pos.x;
+            const dy = pointerY - sh.pos.y;
+            const distSq = dx * dx + dy * dy;
+            const isInLens = distSq <= lensRadiusSq;
+            const target = isInLens ? 1 : 0;
+            const lerpSpeed = isInLens ? 0.18 : 0.08;
+            sh.highlightProgress = s.lerp(
+              sh.highlightProgress,
+              target,
+              lerpSpeed
+            );
+            if (isInLens) {
+              sh.labelTimer = LENS_LABEL_DURATION;
+            } else if (sh.labelTimer > 0) {
+              sh.labelTimer = Math.max(0, sh.labelTimer - 1);
+            }
+          } else {
+            sh.highlightProgress = s.lerp(sh.highlightProgress, 0, 0.08);
+            if (sh.labelTimer > 0) {
+              sh.labelTimer = Math.max(0, sh.labelTimer - 1);
+            }
+          }
+
+          sh.display(s, IMG, effectStrength, lensActive);
+
+          if (sh.labelTimer > 0) {
+            const label = POLLUTANT_LABELS[sh.pollutant];
+            const labelAlpha = Math.min(1, sh.labelTimer / LENS_LABEL_DURATION);
+            const paddingX = 8;
+            const paddingY = 4;
+            const textSize = 13;
+
+            s.push();
+            s.textAlign(s.LEFT, s.BOTTOM);
+            s.textSize(textSize);
+            const textWidthVal = s.textWidth(label);
+            const boxX = sh.pos.x + 14;
+            const boxY = sh.pos.y - 10;
+            s.noStroke();
+            s.fill(255, 255, 255, 210 * labelAlpha);
+            s.rect(
+              boxX,
+              boxY - (textSize + paddingY * 2),
+              textWidthVal + paddingX * 2,
+              textSize + paddingY * 2,
+              999
+            );
+            s.fill(15, 23, 42, 230 * labelAlpha);
+            s.text(label, boxX + paddingX, boxY - paddingY);
+            s.pop();
+          }
         }
 
         // Top up to targetCount

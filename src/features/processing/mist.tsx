@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Fab, Paper, Typography } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useCity } from "../../providers/use-city";
 import ProcessingSketch from "./processing-sketch-3";
-import { motion } from "framer-motion";
 
 /**
  * AQI visualization screen with WebGL frosted glass camera effect.
@@ -13,7 +12,7 @@ import { motion } from "framer-motion";
 const MistPage = () => {
   const { airQualityDetails } = useCity();
   const navigate = useNavigate();
-  const [ctaVisible, setCtaVisible] = useState<boolean>(false);
+  //const [ctaVisible, setCtaVisible] = useState<boolean>(false);
 
   useEffect(() => {
     if (!airQualityDetails) {
@@ -21,9 +20,9 @@ const MistPage = () => {
     }
   }, [airQualityDetails, navigate]);
 
-  const handleRevealCta = useCallback(() => {
-    setCtaVisible(true);
-  }, []);
+  // const handleRevealCta = useCallback(() => {
+  //   setCtaVisible(true);
+  // }, []);
 
   const handleNavigateNext = useCallback(() => {
     navigate("/mist/success");
@@ -44,38 +43,37 @@ const MistPage = () => {
         position: "relative",
         overflow: "hidden",
       }}
-      onMouseDown={handleRevealCta}
-      onTouchStart={handleRevealCta}
+      // onMouseDown={handleRevealCta}
+      // onTouchStart={handleRevealCta}
     >
       <ProcessingSketch />
-      <motion.div
-        initial={{ x: -48, y: 24, opacity: 0 }}
-        animate={{ x: 24, opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
+      <Paper
+        elevation={6}
+        sx={{
+          position: "absolute",
+          top: 24,
+          left: 24,
+          width: 600,
+          height: 100,
+          px: 3,
+          py: 2,
+          maxWidth: 400,
+          backgroundColor: "rgba(101, 159, 65, 0.95)",
+          zIndex: 10, 
+        }}
       >
-        <Paper
-          elevation={6}
+        <Typography
+          variant="body1"
           sx={{
-            px: 3,
-            py: 2,
-            maxWidth: 400,
-            backgroundColor: "rgba(101, 159, 65, 0.95)",
+            fontWeight: 400,
+            fontSize: "1.5rem",
+            color: "#fbfbfb",
+            lineHeight: 1.5,
           }}
         >
-          <Typography
-            variant="body1"
-            sx={{
-              fontWeight: 400,
-              fontSize: "1.5rem",
-              color: "#fbfbfb",
-              lineHeight: 1.4,
-            }}
-          >
-            Hard to see yourself? Drag to clear the mist...
-          </Typography>
-        </Paper>
-      </motion.div>
+          Push the particles and click next when you're ready!
+        </Typography>
+      </Paper>
 
       <Fab
         color="success"
@@ -94,33 +92,23 @@ const MistPage = () => {
         <ArrowBackIcon sx={{ fontSize: 36 }} />
       </Fab>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        animate={
-          ctaVisible ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0 }
-        }
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        style={{
+      <Fab
+        color="success"
+        aria-label="Show results"
+        onClick={handleNavigateNext}
+        sx={{
           position: "absolute",
-          bottom: 32,
-          right: 32,
-          pointerEvents: ctaVisible ? "auto" : "none",
+          bottom: 24,
+          right: 24,
+          width: 72,
+          height: 72,
+          backgroundColor: "#659f41",
+          "&:hover": { backgroundColor: "#56C853" },
         }}
       >
-        <Fab
-          color="success"
-          aria-label="Show results"
-          onClick={handleNavigateNext}
-          sx={{
-            width: 72,
-            height: 72,
-            backgroundColor: "#659f41",
-            "&:hover": { backgroundColor: "#56C853" },
-          }}
-        >
-          <ArrowForwardIcon sx={{ fontSize: 36 }} />
-        </Fab>
-      </motion.div>
+        <ArrowForwardIcon sx={{ fontSize: 36 }} />
+      </Fab>
+
       <Box
         component="span"
         aria-live="polite"
