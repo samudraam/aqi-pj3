@@ -15,7 +15,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import ProcessingSketch2 from "./processing-sketch-3";
 import ParticlesSketch3 from "./particles-sketch-3";
 import { useCity } from "../../providers/use-city";
@@ -68,6 +68,9 @@ export const DebugParticlesOnly = () => {
   );
   const [showParticlesSketch, setShowParticlesSketch] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionDirection, setTransitionDirection] = useState<
+    "in" | "out" | null
+  >(null);
   const [expandedParticles, setExpandedParticles] = useState<
     Record<string, boolean>
   >({});
@@ -102,20 +105,35 @@ export const DebugParticlesOnly = () => {
    * Handles zoom button click to transition to particles sketch
    */
   const handleZoomClick = () => {
+    if (isTransitioning || showParticlesSketch) {
+      return;
+    }
+
+    setTransitionDirection("in");
     setIsTransitioning(true);
     // Wait for transition animation to complete before switching components
     setTimeout(() => {
       setShowParticlesSketch(true);
       setIsTransitioning(false);
+      setTransitionDirection(null);
     }, 600); // Match transition duration
   };
 
   /**
-   * Handles back button click to return to processing sketch
+   * Handles zoom out button click to return to processing sketch
    */
-  const handleBackClick = () => {
-    // Immediate transition back without zoom blur effect
-    setShowParticlesSketch(false);
+  const handleZoomOutClick = () => {
+    if (isTransitioning || !showParticlesSketch) {
+      return;
+    }
+
+    setTransitionDirection("out");
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setShowParticlesSketch(false);
+      setIsTransitioning(false);
+      setTransitionDirection(null);
+    }, 600);
   };
 
   /**
@@ -174,6 +192,24 @@ export const DebugParticlesOnly = () => {
   const infoTitle = showParticlesSketch
     ? airQualityDetails?.cityName || "Unknown City"
     : "Air Quality Info";
+  const isZoomingIn = isTransitioning && transitionDirection === "in";
+  const isZoomingOut = isTransitioning && transitionDirection === "out";
+  const zoomButtonStyles = {
+    position: "fixed",
+    bottom: "2rem",
+    right: "2rem",
+    width: "56px",
+    height: "56px",
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backdropFilter: "blur(10px)",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+    zIndex: 1001,
+    transition: "transform 0.2s ease, background-color 0.2s ease",
+    "&:hover": {
+      backgroundColor: "rgba(255, 255, 255, 1)",
+      transform: "scale(1.1)",
+    },
+  } as const;
 
   return (
     <div
@@ -196,7 +232,9 @@ export const DebugParticlesOnly = () => {
             height: "100vh",
             zIndex: 2000,
             pointerEvents: "none",
-            animation: "zoomBlur 0.6s ease-out forwards",
+            animation: `${
+              transitionDirection === "out" ? "zoomOutBlur" : "zoomInBlur"
+            } 0.6s ease-out forwards`,
           }}
         />
       )}
@@ -208,9 +246,9 @@ export const DebugParticlesOnly = () => {
             position: "relative",
             width: "100%",
             height: "100%",
-            transform: isTransitioning ? "scale(1.5)" : "scale(1)",
-            filter: isTransitioning ? "blur(20px)" : "blur(0px)",
-            opacity: isTransitioning ? 0 : 1,
+            transform: isZoomingIn ? "scale(1.5)" : "scale(1)",
+            filter: isZoomingIn ? "blur(20px)" : "blur(0px)",
+            opacity: isZoomingIn ? 0 : 1,
             transition:
               "transform 0.6s ease-out, filter 0.6s ease-out, opacity 0.6s ease-out",
           }}
@@ -223,7 +261,12 @@ export const DebugParticlesOnly = () => {
             position: "relative",
             width: "100%",
             height: "100%",
-            animation: "fadeIn 0.4s ease-in",
+            animation: isZoomingOut ? "none" : "fadeIn 0.4s ease-in",
+            transform: isZoomingOut ? "scale(0.85)" : "scale(1)",
+            filter: isZoomingOut ? "blur(12px)" : "blur(0px)",
+            opacity: isZoomingOut ? 0 : 1,
+            transition:
+              "transform 0.6s ease-out, filter 0.6s ease-out, opacity 0.6s ease-out",
           }}
         >
           <ParticlesSketch3 showControls={false} />
@@ -283,27 +326,6 @@ export const DebugParticlesOnly = () => {
           {/* Particles Mode */}
           {showParticlesSketch ? (
             <>
-              {/* Back Button */}
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<ArrowBackIcon />}
-                onClick={handleBackClick}
-                disabled={isTransitioning}
-                sx={{
-                  marginBottom: "1.5rem",
-                  textTransform: "none",
-                  borderColor: "#1976d2",
-                  color: "#1976d2",
-                  "&:hover": {
-                    borderColor: "#1565c0",
-                    backgroundColor: "rgba(25, 118, 210, 0.04)",
-                  },
-                }}
-              >
-                Back to Visibility
-              </Button>
-
               {/* Particle Counts */}
               {particleCounts && (
                 <Box sx={{ marginBottom: "1rem" }}>
@@ -559,37 +581,31 @@ export const DebugParticlesOnly = () => {
         </Collapse>
       </Paper>
 
-      {/* Zoom Button - Bottom Right */}
-      {!showParticlesSketch && (
+      {/* Zoom Controls - Bottom Right */}
+      {!showParticlesSketch ? (
         <IconButton
           onClick={handleZoomClick}
           disabled={isTransitioning}
-          sx={{
-            position: "fixed",
-            bottom: "2rem",
-            right: "2rem",
-            width: "56px",
-            height: "56px",
-            backgroundColor: "rgba(255, 255, 255, 0.95)",
-            backdropFilter: "blur(10px)",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-            zIndex: 1001,
-            "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 1)",
-              transform: "scale(1.1)",
-            },
-            transition: "transform 0.2s ease, background-color 0.2s ease",
-          }}
+          sx={zoomButtonStyles}
           aria-label="Zoom to particles view"
         >
           <ZoomInIcon sx={{ color: "#1976d2", fontSize: "28px" }} />
+        </IconButton>
+      ) : (
+        <IconButton
+          onClick={handleZoomOutClick}
+          disabled={isTransitioning}
+          sx={zoomButtonStyles}
+          aria-label="Zoom out to visibility view"
+        >
+          <ZoomOutIcon sx={{ color: "#1976d2", fontSize: "28px" }} />
         </IconButton>
       )}
 
       {/* CSS Animations for zoom blur and fade effects */}
       <style>
         {`
-          @keyframes zoomBlur {
+          @keyframes zoomInBlur {
             0% {
               background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
               opacity: 0;
@@ -600,6 +616,21 @@ export const DebugParticlesOnly = () => {
             }
             100% {
               background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.7) 100%);
+              opacity: 0;
+            }
+          }
+
+          @keyframes zoomOutBlur {
+            0% {
+              background: radial-gradient(circle at center, transparent 50%, rgba(0, 0, 0, 0.7) 100%);
+              opacity: 0;
+            }
+            50% {
+              background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.5) 100%);
+              opacity: 1;
+            }
+            100% {
+              background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
               opacity: 0;
             }
           }
