@@ -62,6 +62,7 @@ export const DebugParticlesOnly = () => {
   const { cityQuery, airQualityDetails, fetchCityAirQuality, isFetching } =
     useCity();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isInfoCollapsed, setIsInfoCollapsed] = useState(false);
   const [inputValue, setInputValue] = useState(
     airQualityDetails?.cityName || cityQuery || ""
   );
@@ -170,6 +171,9 @@ export const DebugParticlesOnly = () => {
   const particleCount = airQualityDetails?.targetCount || 150;
   const aqi = airQualityDetails?.aqi;
   const aqiLabel = airQualityDetails?.aqiLabel || "Unknown";
+  const infoTitle = showParticlesSketch
+    ? airQualityDetails?.cityName || "Unknown City"
+    : "Air Quality Info";
 
   return (
     <div
@@ -238,111 +242,170 @@ export const DebugParticlesOnly = () => {
           backgroundColor: "rgba(255, 255, 255, 0.95)",
           backdropFilter: "blur(10px)",
           borderRadius: "12px",
-          padding: "1.5rem",
+          padding: isInfoCollapsed ? "0.75rem 1rem" : "1.5rem",
           zIndex: 1000,
           transition: "height 0.3s ease",
           maxHeight: "calc(100vh - 4rem)",
           overflowY: "auto",
         }}
       >
-        {/* Particles Mode */}
-        {showParticlesSketch ? (
-          <>
-            {/* City Name */}
-            <Typography
-              variant="h6"
-              sx={{
-                marginBottom: "1rem",
-                fontWeight: "bold",
-                color: "#333",
-              }}
-            >
-              {airQualityDetails?.cityName || "Unknown City"}
-            </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0.5rem",
+            marginBottom: isInfoCollapsed ? 0 : "1rem",
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: "bold",
+              color: "#333",
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
+            {infoTitle}
+          </Typography>
+          <IconButton
+            size="small"
+            onClick={() => setIsInfoCollapsed((prev) => !prev)}
+            aria-label={isInfoCollapsed ? "Expand info" : "Collapse info"}
+            sx={{ color: "#1976d2" }}
+          >
+            {isInfoCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+          </IconButton>
+        </Box>
 
-            {/* Back Button */}
-            <Button
-              fullWidth
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={handleBackClick}
-              disabled={isTransitioning}
-              sx={{
-                marginBottom: "1.5rem",
-                textTransform: "none",
-                borderColor: "#1976d2",
-                color: "#1976d2",
-                "&:hover": {
-                  borderColor: "#1565c0",
-                  backgroundColor: "rgba(25, 118, 210, 0.04)",
-                },
-              }}
-            >
-              Back to Visibility
-            </Button>
+        <Collapse in={!isInfoCollapsed} timeout="auto" unmountOnExit>
+          {/* Particles Mode */}
+          {showParticlesSketch ? (
+            <>
+              {/* Back Button */}
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={<ArrowBackIcon />}
+                onClick={handleBackClick}
+                disabled={isTransitioning}
+                sx={{
+                  marginBottom: "1.5rem",
+                  textTransform: "none",
+                  borderColor: "#1976d2",
+                  color: "#1976d2",
+                  "&:hover": {
+                    borderColor: "#1565c0",
+                    backgroundColor: "rgba(25, 118, 210, 0.04)",
+                  },
+                }}
+              >
+                Back to Visibility
+              </Button>
 
-            {/* Particle Counts */}
-            {particleCounts && (
-              <Box sx={{ marginBottom: "1rem" }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "#666",
-                    marginBottom: "0.75rem",
-                    fontWeight: 500,
-                  }}
-                >
-                  Particle Types (
-                  {Object.values(particleCounts).reduce((a, b) => a + b, 0)}{" "}
-                  total)
-                </Typography>
-
-                {(
-                  Object.keys(POLLUTANT_INFO) as Array<
-                    keyof typeof POLLUTANT_INFO
+              {/* Particle Counts */}
+              {particleCounts && (
+                <Box sx={{ marginBottom: "1rem" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#666",
+                      marginBottom: "0.75rem",
+                      fontWeight: 500,
+                    }}
                   >
-                ).map((key) => {
-                  const count = particleCounts[key] || 0;
-                  const info = POLLUTANT_INFO[key];
-                  const isExpanded = expandedParticles[key] || false;
+                    Particle Types (
+                    {Object.values(particleCounts).reduce((a, b) => a + b, 0)}{" "}
+                    total)
+                  </Typography>
 
-                  return (
-                    <Accordion
-                      key={key}
-                      expanded={isExpanded}
-                      onChange={() => handleParticleAccordionChange(key)}
-                      sx={{
-                        marginBottom: "0.5rem",
-                        boxShadow: "none",
-                        border: "1px solid rgba(0, 0, 0, 0.12)",
-                        "&:before": {
-                          display: "none",
-                        },
-                      }}
+                  {(
+                    Object.keys(POLLUTANT_INFO) as Array<
+                      keyof typeof POLLUTANT_INFO
                     >
-                      <AccordionSummary
-                        expandIcon={<ExpandMoreIcon />}
+                  ).map((key) => {
+                    const count = particleCounts[key] || 0;
+                    const info = POLLUTANT_INFO[key];
+                    const isExpanded = expandedParticles[key] || false;
+
+                    return (
+                      <Accordion
+                        key={key}
+                        expanded={isExpanded}
+                        onChange={() => handleParticleAccordionChange(key)}
                         sx={{
-                          backgroundColor: "rgba(0, 0, 0, 0.02)",
-                          minHeight: "48px",
-                          "&.Mui-expanded": {
-                            minHeight: "48px",
+                          marginBottom: "0.5rem",
+                          boxShadow: "none",
+                          border: "1px solid rgba(0, 0, 0, 0.12)",
+                          "&:before": {
+                            display: "none",
                           },
                         }}
                       >
-                        <Box
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
                           sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            width: "100%",
-                            paddingRight: "0.5rem",
+                            backgroundColor: "rgba(0, 0, 0, 0.02)",
+                            minHeight: "48px",
+                            "&.Mui-expanded": {
+                              minHeight: "48px",
+                            },
                           }}
                         >
                           <Box
                             sx={{
                               display: "flex",
+                              justifyContent: "space-between",
                               alignItems: "center",
+                              width: "100%",
+                              paddingRight: "0.5rem",
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.75rem",
+                              }}
+                            >
+                              <Box
+                                component="img"
+                                src={info.imageUrl}
+                                alt={info.label}
+                                sx={{
+                                  width: "32px",
+                                  height: "32px",
+                                  objectFit: "contain",
+                                }}
+                              />
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontWeight: 500,
+                                  color: "#333",
+                                }}
+                              >
+                                {info.label}
+                              </Typography>
+                            </Box>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: "bold",
+                                color: "#1976d2",
+                                marginLeft: "1rem",
+                              }}
+                            >
+                              {count}
+                            </Typography>
+                          </Box>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
                               gap: "0.75rem",
                             }}
                           >
@@ -351,198 +414,149 @@ export const DebugParticlesOnly = () => {
                               src={info.imageUrl}
                               alt={info.label}
                               sx={{
-                                width: "32px",
-                                height: "32px",
+                                width: "64px",
+                                height: "64px",
                                 objectFit: "contain",
+                                alignSelf: "center",
+                                marginBottom: "0.25rem",
                               }}
                             />
                             <Typography
                               variant="body2"
                               sx={{
-                                fontWeight: 500,
-                                color: "#333",
+                                color: "#555",
+                                lineHeight: 1.6,
+                                fontSize: "0.875rem",
                               }}
                             >
-                              {info.label}
+                              {info.description}
                             </Typography>
                           </Box>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontWeight: "bold",
-                              color: "#1976d2",
-                              marginLeft: "1rem",
-                            }}
-                          >
-                            {count}
-                          </Typography>
-                        </Box>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "0.75rem",
-                          }}
-                        >
-                          <Box
-                            component="img"
-                            src={info.imageUrl}
-                            alt={info.label}
-                            sx={{
-                              width: "64px",
-                              height: "64px",
-                              objectFit: "contain",
-                              alignSelf: "center",
-                              marginBottom: "0.25rem",
-                            }}
-                          />
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: "#555",
-                              lineHeight: 1.6,
-                              fontSize: "0.875rem",
-                            }}
-                          >
-                            {info.description}
-                          </Typography>
-                        </Box>
-                      </AccordionDetails>
-                    </Accordion>
-                  );
-                })}
-              </Box>
-            )}
-          </>
-        ) : (
-          <>
-            {/* Processing Mode - Original Content */}
-            <Typography
-              variant="h6"
-              sx={{
-                marginBottom: "1rem",
-                fontWeight: "bold",
-                color: "#333",
-              }}
-            >
-              Air Quality Info
-            </Typography>
+                        </AccordionDetails>
+                      </Accordion>
+                    );
+                  })}
+                </Box>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Processing Mode - Original Content */}
+              {/* City Input */}
+              <form onSubmit={handleCitySubmit}>
+                <TextField
+                  fullWidth
+                  label="City"
+                  value={inputValue}
+                  onChange={handleCityChange}
+                  disabled={isFetching}
+                  size="small"
+                  sx={{
+                    marginBottom: "1rem",
+                    "& .MuiOutlinedInput-root": {
+                      backgroundColor: "white",
+                    },
+                  }}
+                  placeholder="Enter city name"
+                />
+              </form>
 
-            {/* City Input */}
-            <form onSubmit={handleCitySubmit}>
-              <TextField
-                fullWidth
-                label="City"
-                value={inputValue}
-                onChange={handleCityChange}
-                disabled={isFetching}
-                size="small"
-                sx={{
-                  marginBottom: "1rem",
-                  "& .MuiOutlinedInput-root": {
-                    backgroundColor: "white",
-                  },
-                }}
-                placeholder="Enter city name"
-              />
-            </form>
-
-            {/* Particle Count */}
-            <Box
-              sx={{
-                marginBottom: "1rem",
-                padding: "0.75rem",
-                backgroundColor: "rgba(0, 0, 0, 0.05)",
-                borderRadius: "8px",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", marginBottom: "0.25rem" }}
-              >
-                Particle Count
-              </Typography>
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: "bold", color: "#333" }}
-              >
-                {particleCount}
-              </Typography>
-            </Box>
-
-            {/* AQI Value */}
-            <Box
-              sx={{
-                marginBottom: "1rem",
-                padding: "0.75rem",
-                backgroundColor: "rgba(0, 0, 0, 0.05)",
-                borderRadius: "8px",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{ color: "#666", marginBottom: "0.25rem" }}
-              >
-                Air Quality Index
-              </Typography>
-              <Typography
-                variant="h6"
-                sx={{ fontWeight: "bold", color: "#333" }}
-              >
-                {aqi !== null && aqi !== undefined ? `${aqi}/5` : "N/A"} -{" "}
-                {aqiLabel}
-              </Typography>
-            </Box>
-
-            {/* Expandable Section */}
-            <Button
-              fullWidth
-              onClick={() => setIsExpanded(!isExpanded)}
-              endIcon={isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-              sx={{
-                marginBottom: isExpanded ? "1rem" : 0,
-                textTransform: "none",
-                color: "#1976d2",
-                justifyContent: "space-between",
-                padding: "0.5rem",
-              }}
-            >
-              Understand more about air quality and visibility
-            </Button>
-
-            <Collapse in={isExpanded}>
+              {/* Particle Count */}
               <Box
                 sx={{
-                  padding: "1rem",
-                  backgroundColor: "rgba(25, 118, 210, 0.05)",
+                  marginBottom: "1rem",
+                  padding: "0.75rem",
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
                   borderRadius: "8px",
-                  border: "1px solid rgba(25, 118, 210, 0.2)",
                 }}
               >
                 <Typography
                   variant="body2"
-                  sx={{
-                    color: "#555",
-                    lineHeight: 1.6,
-                  }}
+                  sx={{ color: "#666", marginBottom: "0.25rem" }}
                 >
-                  Air quality and visibility are closely related. When the Air
-                  Quality Index (AQI) is high, it indicates elevated levels of
-                  particulate matter (PM2.5 and PM10) and other pollutants in
-                  the atmosphere. These particles when paired with the right
-                  atmospheric conditions can scatter and absorb light, reducing
-                  visibility. High particle concentration can cause hazy air
-                  conditions, making distant objects appear less clear. Fine
-                  particulate matter, particularly PM2.5, is a major contributor
-                  to visible pollution due to its small size and unique chemical
-                  properties that allow it to scatter light more effectively.
+                  Particle Count
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: "bold", color: "#333" }}
+                >
+                  {particleCount}
                 </Typography>
               </Box>
-            </Collapse>
-          </>
-        )}
+
+              {/* AQI Value */}
+              <Box
+                sx={{
+                  marginBottom: "1rem",
+                  padding: "0.75rem",
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
+                  borderRadius: "8px",
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{ color: "#666", marginBottom: "0.25rem" }}
+                >
+                  Air Quality Index
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{ fontWeight: "bold", color: "#333" }}
+                >
+                  {aqi !== null && aqi !== undefined ? `${aqi}/5` : "N/A"} -{" "}
+                  {aqiLabel}
+                </Typography>
+              </Box>
+
+              {/* Expandable Section */}
+              <Button
+                fullWidth
+                onClick={() => setIsExpanded(!isExpanded)}
+                endIcon={isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                sx={{
+                  marginBottom: isExpanded ? "1rem" : 0,
+                  textTransform: "none",
+                  color: "#1976d2",
+                  justifyContent: "space-between",
+                  padding: "0.5rem",
+                }}
+              >
+                Understand more about air quality and visibility
+              </Button>
+
+              <Collapse in={isExpanded}>
+                <Box
+                  sx={{
+                    padding: "1rem",
+                    backgroundColor: "rgba(25, 118, 210, 0.05)",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(25, 118, 210, 0.2)",
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "#555",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    Air quality and visibility are closely related. When the Air
+                    Quality Index (AQI) is high, it indicates elevated levels of
+                    particulate matter (PM2.5 and PM10) and other pollutants in
+                    the atmosphere. These particles when paired with the right
+                    atmospheric conditions can scatter and absorb light,
+                    reducing visibility. High particle concentration can cause
+                    hazy air conditions, making distant objects appear less
+                    clear. Fine particulate matter, particularly PM2.5, is a
+                    major contributor to visible pollution due to its small size
+                    and unique chemical properties that allow it to scatter
+                    light more effectively.
+                  </Typography>
+                </Box>
+              </Collapse>
+            </>
+          )}
+        </Collapse>
       </Paper>
 
       {/* Zoom Button - Bottom Right */}
