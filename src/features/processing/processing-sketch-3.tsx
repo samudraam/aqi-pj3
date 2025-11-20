@@ -11,6 +11,19 @@ interface Particle {
   brightness: number;
 }
 
+interface SketchConfig {
+  particleCount: number;
+  particleSpeed: number;
+  particleBrightness: number;
+  particleSize: number;
+  blurRadius: number;
+}
+
+const MIN_AQI_INDEX = 1;
+const MAX_AQI_INDEX = 5;
+const MIN_BLUR_RADIUS = 4;
+const MAX_BLUR_RADIUS = 18;
+
 /**
  * WebGL frosted glass camera effect with AQI-driven particles.
  */
@@ -25,22 +38,32 @@ const ProcessingSketch2 = () => {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const metadataCleanupRef = useRef<(() => void) | null>(null);
 
-  const sketchConfig = useMemo(() => {
-    const defaultConfig = {
+  const sketchConfig = useMemo<SketchConfig>(() => {
+    const defaultConfig: SketchConfig = {
       particleCount: 150,
       particleSpeed: 0.15,
       particleBrightness: 1,
       particleSize: 2.5,
+      blurRadius: (MIN_BLUR_RADIUS + MAX_BLUR_RADIUS) / 2,
     };
 
     if (!airQualityDetails) {
       return defaultConfig;
     }
 
-    const { effectStrength, targetCount } = airQualityDetails;
+    const { effectStrength, targetCount, aqi } = airQualityDetails;
     const strength = Number.isFinite(effectStrength)
       ? Math.min(Math.max(effectStrength, 0), 1)
       : 0.3;
+
+    const hasValidAqi = typeof aqi === "number" && Number.isFinite(aqi);
+    const resolvedAqi = hasValidAqi
+      ? Math.min(Math.max(aqi, MIN_AQI_INDEX), MAX_AQI_INDEX)
+      : (MIN_AQI_INDEX + MAX_AQI_INDEX) / 2;
+    const aqiRatio =
+      (resolvedAqi - MIN_AQI_INDEX) / (MAX_AQI_INDEX - MIN_AQI_INDEX);
+    const blurRadius =
+      MIN_BLUR_RADIUS + aqiRatio * (MAX_BLUR_RADIUS - MIN_BLUR_RADIUS);
 
     const particleCount = Math.min(
       180,
@@ -55,6 +78,7 @@ const ProcessingSketch2 = () => {
       particleSpeed,
       particleBrightness,
       particleSize,
+      blurRadius,
     };
   }, [airQualityDetails]);
 
@@ -107,10 +131,10 @@ const ProcessingSketch2 = () => {
 
       const sketch = (s: p5) => {
         const DOWNSAMPLE = 2;
-        const BLUR_RADIUS = 8;
         const REFRACT_AMT = 0.5;
         const GRAIN_AMT = 0;
         const DESAT_AMT = 0.2;
+        const blurRadius = sketchConfig.blurRadius;
         // comment out brush size and strength
         // const BRUSH_SIZE = 80;
         // const BRUSH_STRENGTH = 0.3;
@@ -220,7 +244,7 @@ const ProcessingSketch2 = () => {
           maskG.background(255);
         };
 
-        // comment out paining 
+        // comment out paining
         // const paintReveal = (x: number, y: number) => {
         //   maskG.push();
         //   maskG.noStroke();
@@ -249,7 +273,7 @@ const ProcessingSketch2 = () => {
           uniform sampler2D tex;
           
           void main() {
-            vec2 uv = vec2(vTexCoord.x, 1.0 - vTexCoord.y);
+            vec2 uv = vec2(1.0 - vTexCoord.x, 1.0 - vTexCoord.y);
             gl_FragColor = texture2D(tex, uv);
           }
         `;
@@ -346,6 +370,7 @@ const ProcessingSketch2 = () => {
           
           void main() {
             vec2 uv = vec2(vTexCoord.x, 1.0 - vTexCoord.y);
+            vec2 mirroredCamUV = vec2(1.0 - uv.x, uv.y);
             float maskValue = texture2D(maskTex, uv).r;
             
             vec2 noiseUV = uv * resolution * 0.5;
@@ -357,7 +382,7 @@ const ProcessingSketch2 = () => {
             vec2 refractedUV = uv + refractOffset * maskValue;
             refractedUV = clamp(refractedUV, 0.0, 1.0);
             
-            vec4 sharpColor = texture2D(camTex, uv);
+            vec4 sharpColor = texture2D(camTex, mirroredCamUV);
             vec4 blurredColor = texture2D(blurTex, refractedUV);
             vec4 color = mix(sharpColor, blurredColor, maskValue);
             
@@ -477,7 +502,7 @@ const ProcessingSketch2 = () => {
           pgLowB.shader(blurHShader);
           blurHShader.setUniform("tex", pgLowA);
           blurHShader.setUniform("resolution", [pgLowA.width, pgLowA.height]);
-          blurHShader.setUniform("radius", BLUR_RADIUS);
+          blurHShader.setUniform("radius", blurRadius);
           pgLowB.rect(0, 0, pgLowB.width, pgLowB.height);
           pgLowB.pop();
 
@@ -486,7 +511,7 @@ const ProcessingSketch2 = () => {
           pgLowA.shader(blurVShader);
           blurVShader.setUniform("tex", pgLowB);
           blurVShader.setUniform("resolution", [pgLowB.width, pgLowB.height]);
-          blurVShader.setUniform("radius", BLUR_RADIUS);
+          blurVShader.setUniform("radius", blurRadius);
           pgLowA.rect(0, 0, pgLowA.width, pgLowA.height);
           pgLowA.pop();
 
