@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useCity } from "../../providers/use-city";
-import grass from "../../assets/grass.png";
+import grass from "../../assets/grass2.png";
 /**
  * Landing hero for city search.
  */
@@ -55,15 +55,15 @@ const LandingPage = () => {
       role="main"
       sx={{
         minHeight: "100vh",
-        minWidth: "100vw",
+        width: "100%",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        px: 2,
-        backgroundImage: `url(${grass})`,
-        backgroundSize: { xs: "320%", sm: "105%" },
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
+        px: { xs: 2, sm: 3 },
+        py: { xs: 6, sm: 8 },
+        position: "relative",
+        overflow: "hidden",
+        background: "linear-gradient(180deg, #6CB2CE 0%, #FFFFFF 72%)",
       }}
     >
       <Box
@@ -72,76 +72,67 @@ const LandingPage = () => {
         noValidate
         sx={{
           width: "100%",
-          maxWidth: 900,
+          maxWidth: { xs: 520, sm: 640, md: 720 },
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 4,
+          textAlign: "center",
+          marginBottom: { xs: 10, sm: 4, md: 35},
+          gap: { xs: 3, sm: 4 },
+          zIndex: 12,
         }}
       >
         <Typography
           ref={headingRef}
           component="h1"
-          variant="h4"
-          align="center"
           color="#000000"
           sx={{
-            fontWeight: 400,
-            letterSpacing: 0.5,
-            pb: { xs: 2, sm: 8 },
+            fontFamily: 'Antipol-Bold',
+            fontSize: { xs: "2.25rem", sm: "3rem", md: "4.5rem" },
+            letterSpacing: { xs: 0.5, sm: 1 },
           }}
         >
-          {Array.from("Learn about").map((letter, index) => (
+          {Array.from("What's in your air?").map((letter, index) => (
             <motion.span
               key={`${letter}-${index}`}
               initial={{ opacity: 0 }}
               animate={isHeadingInView ? { opacity: 1 } : { opacity: 0 }}
-              transition={{ duration: 0.2, delay: index * 0.1 }}
+              transition={{ duration: 0.2, delay: index * 0.05 }}
             >
-              {letter}
+              {letter === " " ? "\u00A0" : letter}
             </motion.span>
           ))}
         </Typography>
+
         <Box
           sx={{
-            width: "100%",
-            maxWidth: 800,
+            width: "80%",
             display: "flex",
             alignItems: "center",
-            gap: 2,
-            borderBottom: "4px solid rgb(0, 0, 0)",
-            pb: 1.5,
+            backgroundColor: "#ffffff",
+            borderRadius: 9999,
+            boxShadow: "0px 16px 40px rgba(41, 89, 120, 0.18)",
+            px: { xs: 1.5, sm: 2.5 },
+            py: { xs: 1, sm: 1.25 },
+            gap: { xs: 1, sm: 1.5 },
           }}
         >
           <InputBase
             value={cityQuery}
             onChange={handleCityChange}
-            placeholder="Your city"
+            placeholder="Enter your city to begin"
             autoFocus
             fullWidth
             inputProps={{
               "aria-label": "City search input",
-              style: {
-                textTransform: "uppercase",
-                textAlign: "center",
-                fontWeight: 400,
-                letterSpacing: 1,
-                fontFamily: "'Alloy Ink', sans-serif",
-              },
             }}
             sx={{
-              flex: 1,
-              fontSize: { xs: "5rem", sm: "6.75rem" },
-              textAlign: "center",
-              fontWeight: 700,
-              letterSpacing: 3,
-              textTransform: "uppercase",
-              color: "#000000",
-              fontFamily: "'Alloy Ink', sans-serif",
+              fontSize: { xs: "1rem", sm: "1.25rem", md: "1.25rem" },
+              fontWeight: 500,
+              color: "#1C1C1E",
               "& input::placeholder": {
-                color: "rgba(0, 0, 0)",
+                color: "#8E8E93",
                 opacity: 1,
-                fontFamily: "'Alloy Ink', sans-serif",
               },
             }}
           />
@@ -150,42 +141,67 @@ const LandingPage = () => {
             aria-label="Submit city search"
             disabled={!isSubmitVisible || isFetching}
             sx={{
-              border: "5px solid rgb(0, 0, 0)",
-              width: 86,
-              height: 86,
-              color: "#000000",
-              "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.08)" },
+              border: "2px solid rgba(108, 178, 206, 0.5)",
+              borderRadius: "50%",
+              width: { xs: 48, sm: 56 },
+              height: { xs: 48, sm: 56 },
+              color: "#4A7EA8",
+              backgroundColor: "#ffffff",
+              transition: "transform 0.2s ease, background 0.2s ease",
+              "&:hover": {
+                backgroundColor: "rgba(108, 178, 206, 0.12)",
+                transform: "translateX(2px)",
+              },
+              "&:disabled": {
+                opacity: 0.4,
+                transform: "none",
+                backgroundColor: "#ffffff",
+              },
             }}
           >
             {isFetching ? (
-              <CircularProgress size={24} sx={{ color: "#000000" }} />
+              <CircularProgress size={22} sx={{ color: "#4A7EA8" }} />
             ) : (
-              <ArrowForwardIcon sx={{ color: "#000000", fontSize: { xs: "2rem", sm: "3.75rem" }}} />
+              <ArrowForwardIcon
+                sx={{
+                  fontSize: { xs: "1.75rem", sm: "2rem" },
+                }}
+              />
             )}
           </IconButton>
         </Box>
-        <Typography
-          variant="body2"
-          sx={{ color: "#000000", fontSize: {xs:"1rem" , sm: "1.2rem"},letterSpacing: 1, mt: -1 }}
-        >
-          Enter a city
-        </Typography>
+
         {errorMessage && (
           <Alert
             severity="error"
             sx={{
               width: "100%",
-              maxWidth: 420,
+              maxWidth: { xs: "100%", sm: 420 },
               borderRadius: 3,
-              bgcolor: "rgba(239, 68, 68, 0.85)",
+              bgcolor: "rgba(239, 68, 68, 0.9)",
               color: "#ffffff",
-              mt: 1,
             }}
           >
             {errorMessage}
           </Alert>
         )}
       </Box>
+
+      <Box
+        aria-hidden
+        sx={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          width: "100%",
+          height: { xs: "32vh", sm: "38vh", md: "60vh" },
+          backgroundImage: `url(${grass})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
+          zIndex: 5,
+        }}
+      />
     </Box>
   );
 };

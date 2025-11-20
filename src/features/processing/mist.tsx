@@ -4,7 +4,7 @@ import { Box, Fab, Paper, Typography } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useCity } from "../../providers/use-city";
-import ProcessingSketch from "./processing-sketch";
+import ProcessingSketch from "./processing-sketch-3";
 import { motion } from "framer-motion";
 
 /**
