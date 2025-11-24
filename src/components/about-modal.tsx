@@ -33,7 +33,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onClose }) => {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%) !important", // Override default transform because framer-motion handles it
-          width: { xs: "90%", sm: 400 },
+          width: { xs: "90%", sm: "80%", md: "70%" },
           bgcolor: "background.paper",
           boxShadow: 24,
           p: 4,
@@ -46,7 +46,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onClose }) => {
           onClick={onClose}
           sx={{
             position: "absolute",
-            right: 8,
+            left: 8,
             top: 8,
             color: (theme) => theme.palette.grey[500],
           }}
@@ -60,26 +60,51 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onClose }) => {
           component="h2"
           align="center"
           sx={{
-            mb: 2,
-            fontFamily: "Antipol-Bold",
+            mb: 4,
+            fontFamily: "Inter",
             fontSize: "1.5rem",
+            fontWeight: 600,
           }}
         >
-          About
+          About Pollutant Playground
+        </Typography>
+
+        <Typography
+          id="about-modal-subtitle"
+          variant="body1"
+          component="h2"
+          align="left"
+          sx={{ mb: 4, fontFamily: "Inter", fontSize: { xs: "1rem", sm: "1rem", md: "1.8rem" }, fontWeight: 400 }}
+        >
+          In 2025, over 150 million people in the United States breathe
+          unhealthy air.
         </Typography>
 
         <Typography
           id="about-modal-description"
-          align="center"
+          align="left"
           sx={{
             fontFamily: "Inter",
             fontSize: "1rem",
-            lineHeight: 1.6,
+            lineHeight: 2,
           }}
         >
-          An interactive learning experience about air quality and the ways it
-          affects us created for Conditional Design @ WashU by Natalie,
-          Christine, and Ramya.
+          The <span style={{ textDecoration: "underline" }}><a href="https://www.lung.org/media/press-releases/state-of-the-air-2025" target="_blank" rel="noopener noreferrer">American Lung Association </a></span> 
+          found that 46% of Americans live in areas that received an “F” grade for either ozone or particle
+          pollution.
+          <br />
+          <br />
+          The air pollutants that Pollutant Playground explores,
+          while colorful in our visualizations, impact <span style={{ fontWeight: 600 }}>everyone’s health</span>. Air
+          quality affects everyone, but most people don't understand what
+          they're breathing. We break down the AQI into its parts—making
+          pollution visible, understandable, and actionable. 
+          
+          <br />
+          <br />
+          This experience reveals the invisible particles that make up air quality. Explore what
+          you're breathing, where it comes from, and what it means for your
+          health.
         </Typography>
       </Box>
     </Modal>

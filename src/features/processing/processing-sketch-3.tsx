@@ -21,7 +21,7 @@ interface SketchConfig {
 
 const MIN_AQI_INDEX = 1;
 const MAX_AQI_INDEX = 5;
-const MIN_BLUR_RADIUS = 4;
+const MIN_BLUR_RADIUS = 2;
 const MAX_BLUR_RADIUS = 18;
 const SWIPE_RADIUS = 140;
 const SWIPE_STRENGTH = 6;
@@ -67,8 +67,10 @@ const ProcessingSketch2 = () => {
       : (MIN_AQI_INDEX + MAX_AQI_INDEX) / 2;
     const aqiRatio =
       (resolvedAqi - MIN_AQI_INDEX) / (MAX_AQI_INDEX - MIN_AQI_INDEX);
+    // Use quadratic curve to reduce blur for lower AQI cities
+    const curvedRatio = Math.pow(aqiRatio, 2);
     const blurRadius =
-      MIN_BLUR_RADIUS + aqiRatio * (MAX_BLUR_RADIUS - MIN_BLUR_RADIUS);
+      MIN_BLUR_RADIUS + curvedRatio * (MAX_BLUR_RADIUS - MIN_BLUR_RADIUS);
 
     const particleCount = Math.min(
       180,
@@ -715,7 +717,8 @@ const ProcessingSketch2 = () => {
             pointerEvents: "none",
           }}
         >
-          {cameraError || "Initializing camera..."}
+          {cameraError ||
+            "Waiting for camera... \n (type a city name if no feed appears)"}
         </div>
       )}
     </>

@@ -1,54 +1,58 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import type { FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   TextField,
   Typography,
-  Button,
   Paper,
   Collapse,
   IconButton,
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Tooltip,
+  Fab,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ProcessingSketch2 from "./processing-sketch-3";
 import ParticlesSketch3 from "./particles-sketch-3";
 import { useCity } from "../../providers/use-city";
-
+import Timeline from "../../components/timeline";
 // Particle type labels, descriptions, and images
 const POLLUTANT_INFO = {
   o3: {
     label: "Ozone (O₃)",
-    imageUrl: "/particles_O3.png",
+    imageUrl: "/thumbnail_new_O3.png",
     description:
       "Ozone is a reactive gas that forms when nitrogen oxides and volatile organic compounds react in sunlight. Ground-level ozone can cause respiratory problems and aggravate asthma. High levels are often associated with sunny, stagnant weather conditions.",
   },
   pm2_5: {
     label: "PM2.5",
-    imageUrl: "/particles_PM2.5.png",
+    imageUrl: "/thumbnail_new_PM2.5.png",
     description:
       "Fine particulate matter with diameter less than 2.5 micrometers. These tiny particles can penetrate deep into the lungs and even enter the bloodstream, causing cardiovascular and respiratory issues. Sources include vehicle exhaust, industrial emissions, and wildfires.",
   },
   pm10: {
     label: "PM10",
-    imageUrl: "/particles_PM10.png",
+    imageUrl: "/thumbnail_new_PM10.png",
     description:
       "Particulate matter with diameter less than 10 micrometers. These larger particles can irritate the eyes, nose, and throat. Common sources include dust from roads, construction sites, and agricultural activities.",
   },
   co: {
     label: "Carbon Monoxide (CO)",
-    imageUrl: "/particles-C02.png",
+    imageUrl: "/thumbnail_new_CO2.png",
     description:
       "A colorless, odorless gas produced by incomplete combustion of carbon-based fuels. High levels primarily come from vehicle emissions. Carbon monoxide reduces the blood's ability to carry oxygen, which can be particularly dangerous for people with heart conditions.",
   },
   no2: {
     label: "Nitrogen Dioxide (NO₂)",
-    imageUrl: "/particles-NO2.png",
+    imageUrl: "/thumbnail_new_NO2.png",
     description:
       "A reddish-brown gas produced by burning fossil fuels, especially in vehicles and power plants. Nitrogen dioxide can irritate airways and worsen respiratory conditions like asthma. It also contributes to the formation of ground-level ozone and fine particles.",
   },
@@ -59,9 +63,9 @@ const POLLUTANT_INFO = {
  */
 export const DebugParticlesOnly = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   const { cityQuery, airQualityDetails, fetchCityAirQuality, isFetching } =
     useCity();
-  const [isExpanded, setIsExpanded] = useState(false);
   const [isInfoCollapsed, setIsInfoCollapsed] = useState(false);
   const [inputValue, setInputValue] = useState(
     airQualityDetails?.cityName || cityQuery || ""
@@ -147,6 +151,20 @@ export const DebugParticlesOnly = () => {
   };
 
   /**
+   * Handles navigation to previous page
+   */
+  const handleNavigatePrevious = useCallback(() => {
+    navigate("/examine");
+  }, [navigate]);
+
+  /**
+   * Handles navigation to next page
+   */
+  const handleNavigateNext = useCallback(() => {
+    navigate("/conclusion");
+  }, [navigate]);
+
+  /**
    * Calculate particle counts based on air quality components
    * This approximates what's displayed in the sketch
    */
@@ -192,6 +210,7 @@ export const DebugParticlesOnly = () => {
   const infoTitle = showParticlesSketch
     ? airQualityDetails?.cityName || "Unknown City"
     : "Air Quality Info";
+  const currentTimelineStep = showParticlesSketch ? "Microview" : "Macroview";
   const isZoomingIn = isTransitioning && transitionDirection === "in";
   const isZoomingOut = isTransitioning && transitionDirection === "out";
   const zoomButtonStyles = {
@@ -200,7 +219,7 @@ export const DebugParticlesOnly = () => {
     right: "2rem",
     width: "56px",
     height: "56px",
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: "#FFD400",
     backdropFilter: "blur(10px)",
     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
     zIndex: 1001,
@@ -221,6 +240,45 @@ export const DebugParticlesOnly = () => {
         overflow: "hidden",
       }}
     >
+      {/* Timeline Component */}
+      <Timeline currentStep={currentTimelineStep} />
+
+      {/* Navigation Buttons - Top Left and Right */}
+      <Fab
+        color="success"
+        aria-label="Go back"
+        onClick={handleNavigatePrevious}
+        sx={{
+          position: "fixed",
+          top: 24,
+          left: 24,
+          width: 72,
+          height: 72,
+          backgroundColor: "#FFD400",
+          "&:hover": { backgroundColor: "#FFE254" },
+          zIndex: 1002,
+        }}
+      >
+        <ArrowBackIcon sx={{ fontSize: 36, color: "#000000" }} />
+      </Fab>
+      <Fab
+        color="success"
+        aria-label="Show results"
+        onClick={handleNavigateNext}
+        sx={{
+          position: "fixed",
+          top: 24,
+          right: 24,
+          width: 72,
+          height: 72,
+          backgroundColor: "#FFD400",
+          "&:hover": { backgroundColor: "#FFE254" },
+          zIndex: 1002,
+        }}
+      >
+        <ArrowForwardIcon sx={{ fontSize: 36, color: "#000000" }} />
+      </Fab>
+
       {/* Transition overlay for zoom blur effect */}
       {isTransitioning && (
         <div
@@ -242,6 +300,7 @@ export const DebugParticlesOnly = () => {
       {/* Conditionally render sketches */}
       {!showParticlesSketch ? (
         <div
+          key={airQualityDetails?.cityName || "no-city"} // Add key prop
           style={{
             position: "relative",
             width: "100%",
@@ -257,6 +316,7 @@ export const DebugParticlesOnly = () => {
         </div>
       ) : (
         <div
+          key={airQualityDetails?.cityName || "no-city"} // Add key prop
           style={{
             position: "relative",
             width: "100%",
@@ -316,7 +376,11 @@ export const DebugParticlesOnly = () => {
             size="small"
             onClick={() => setIsInfoCollapsed((prev) => !prev)}
             aria-label={isInfoCollapsed ? "Expand info" : "Collapse info"}
-            sx={{ color: "#1976d2" }}
+            sx={{
+              color: "#000000",
+              border: "1px solid #FFD400",
+              borderRadius: "50%",
+            }}
           >
             {isInfoCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
           </IconButton>
@@ -529,53 +593,6 @@ export const DebugParticlesOnly = () => {
                   {aqiLabel}
                 </Typography>
               </Box>
-
-              {/* Expandable Section */}
-              <Button
-                fullWidth
-                onClick={() => setIsExpanded(!isExpanded)}
-                endIcon={isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                sx={{
-                  marginBottom: isExpanded ? "1rem" : 0,
-                  textTransform: "none",
-                  color: "#1976d2",
-                  justifyContent: "space-between",
-                  padding: "0.5rem",
-                }}
-              >
-                Understand more about air quality and visibility
-              </Button>
-
-              <Collapse in={isExpanded}>
-                <Box
-                  sx={{
-                    padding: "1rem",
-                    backgroundColor: "rgba(25, 118, 210, 0.05)",
-                    borderRadius: "8px",
-                    border: "1px solid rgba(25, 118, 210, 0.2)",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "#555",
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    Air quality and visibility are closely related. When the Air
-                    Quality Index (AQI) is high, it indicates elevated levels of
-                    particulate matter (PM2.5 and PM10) and other pollutants in
-                    the atmosphere. These particles when paired with the right
-                    atmospheric conditions can scatter and absorb light,
-                    reducing visibility. High particle concentration can cause
-                    hazy air conditions, making distant objects appear less
-                    clear. Fine particulate matter, particularly PM2.5, is a
-                    major contributor to visible pollution due to its small size
-                    and unique chemical properties that allow it to scatter
-                    light more effectively.
-                  </Typography>
-                </Box>
-              </Collapse>
             </>
           )}
         </Collapse>
@@ -589,7 +606,9 @@ export const DebugParticlesOnly = () => {
           sx={zoomButtonStyles}
           aria-label="Zoom to particles view"
         >
-          <ZoomInIcon sx={{ color: "#1976d2", fontSize: "28px" }} />
+          <Tooltip title="Zoom to particles view">
+            <ZoomInIcon sx={{ color: "#000000", fontSize: "28px" }} />
+          </Tooltip>
         </IconButton>
       ) : (
         <IconButton
@@ -598,7 +617,9 @@ export const DebugParticlesOnly = () => {
           sx={zoomButtonStyles}
           aria-label="Zoom out to visibility view"
         >
-          <ZoomOutIcon sx={{ color: "#1976d2", fontSize: "28px" }} />
+          <Tooltip title="Zoom out to visibility view">
+            <ZoomOutIcon sx={{ color: "#000000", fontSize: "28px" }} />
+          </Tooltip>{" "}
         </IconButton>
       )}
 

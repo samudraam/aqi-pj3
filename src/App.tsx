@@ -7,6 +7,7 @@ import ExaminePage from "./features/processing/examine";
 import MorePage from "./features/processing/more";
 import { DebugParticlesOnly } from "./features/processing/particlesDebug";
 import ParticleView from "./features/processing/particleView";
+import ConclusionPage from "./features/processing/conclusion";
 /**
  * Application routing and providers.
  */
@@ -21,6 +22,7 @@ const App = () => (
         <Route path="/more" element={<MorePage />} />
         <Route path="/particles-debug" element={<DebugParticlesOnly />} />
         <Route path="/particle-view" element={<ParticleView />} />
+        <Route path="/conclusion" element={<ConclusionPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

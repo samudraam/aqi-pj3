@@ -77,7 +77,7 @@ const POLLUTANT_IMAGE_URLS: Record<PollutantKey, string> = {
   o3: "/thumbnail_new_O3.png",
   pm2_5: "/thumbnail_new_PM2.5.png",
   pm10: "/thumbnail_new_PM10.png",
-  co: "/thumbnail_new_CO2.png", 
+  co: "/thumbnail_new_CO2.png",
   no2: "/thumbnail_new_NO2.png",
 };
 
