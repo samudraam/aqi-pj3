@@ -24,6 +24,7 @@ import ProcessingSketch2 from "./processing-sketch-3";
 import ParticlesSketch3 from "./particles-sketch-3";
 import { useCity } from "../../providers/use-city";
 import Timeline from "../../components/timeline";
+import { AqiSlider } from "../../components/aqi-slider";
 // Particle type labels, descriptions, and images
 const POLLUTANT_INFO = {
   o3: {
@@ -592,6 +593,15 @@ export const DebugParticlesOnly = () => {
                   {aqi !== null && aqi !== undefined ? `${aqi}/5` : "N/A"} -{" "}
                   {aqiLabel}
                 </Typography>
+              </Box>
+
+              {/* AQI Slider */}
+              <Box
+                sx={{
+                  marginBottom: "1rem",
+                }}
+              >
+                <AqiSlider aqi={aqi} />
               </Box>
             </>
           )}
