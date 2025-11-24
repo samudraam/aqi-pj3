@@ -2,15 +2,17 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import { Box, Typography, Paper, Chip, Fab } from "@mui/material";
 import { motion } from "framer-motion";
 import magnifierSrc from "../../assets/magnifier.png";
-import particleO3 from "/particles_O3.png";
-import particlePM25 from "/particles_PM2.5.png";
-import particlePM10 from "/particles_PM10.png";
-import particleCO2 from "/particles-C02.png";
-import particleNO2 from "/particles-NO2.png";
+import particleO3 from "/thumbnail_new_O3.png";
+import particlePM25 from "/thumbnail_new_PM2.5.png";
+import particlePM10 from "/thumbnail_new_PM10.png";
+import particleCO2 from "/thumbnail_new_CO2.png";
+import particleNO2 from "/thumbnail_new_NO2.png";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
-
+import Timeline from "../../components/timeline";
 type ParticleId = "pm10" | "pm25" | "o3" | "co" | "no2";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import health from "/health.png";
 
 type ParticleMeta = {
   id: ParticleId;
@@ -79,7 +81,8 @@ const ExaminePage = () => {
       baseParticles.map((particle) => ({
         ...particle,
         top: `${Math.round(15 + Math.random() * 60)}%`,
-        left: `${Math.round(15 + Math.random() * 60)}%`,
+        // Start particles from 30% to avoid the info box area on the left (which is ~400px wide)
+        left: `${Math.round(30 + Math.random() * 50)}%`,
       })),
     []
   );
@@ -90,26 +93,16 @@ const ExaminePage = () => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [cursorVisible, setCursorVisible] = useState(false);
   const [hoveredId, setHoveredId] = useState<ParticleId | null>(null);
-  const [infoPosition, setInfoPosition] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.debug("hoveredId changed", hoveredId);
   }, [hoveredId]);
 
-  const handleActivate = (
-    particle: ParticleInstance,
-    event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>
-  ) => {
-    const target = event.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    console.debug("activate", particle.id, "target:", target.tagName);
+  const handleActivate = (particle: ParticleInstance) => {
+    console.debug("activate", particle.id);
     setActiveParticle(particle);
     setHoveredId(particle.id);
-    setInfoPosition({ x: rect.left + rect.width / 2, y: rect.top + 100 });
   };
 
   const handlePointerLeave = (particleId?: ParticleId) => {
@@ -119,11 +112,14 @@ const ExaminePage = () => {
       setHoveredId((current) => (current === idToClear ? null : current));
     }
     setActiveParticle(null);
-    setInfoPosition(null);
   };
 
   const handleNavigateNext = useCallback(() => {
-    navigate("/more");
+    navigate("/particles-debug");
+  }, [navigate]);
+
+  const handleNavigatePrevious = useCallback(() => {
+    navigate("/mist");
   }, [navigate]);
 
   return (
@@ -135,7 +131,10 @@ const ExaminePage = () => {
         minWidth: "100vw",
         position: "relative",
         overflow: "hidden",
-        bgcolor: "#ffffff",
+        backgroundImage: "linear-gradient(180deg, #6CB2CE 0%, #FFFFFF 72%)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         cursor: "none",
       }}
       onPointerMove={(event) => {
@@ -146,6 +145,7 @@ const ExaminePage = () => {
         setCursorVisible(false);
       }}
     >
+      <Timeline currentStep="discover" />
       {particleInstances.map((particle) => {
         const isActive = hoveredId === particle.id;
         return (
@@ -159,9 +159,9 @@ const ExaminePage = () => {
               scale: isActive ? 1.05 : 0.9,
             }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            onPointerEnter={(event) => handleActivate(particle, event as never)}
-            onPointerDown={(event) => handleActivate(particle, event as never)}
-            onFocus={(event) => handleActivate(particle, event as never)}
+            onPointerEnter={() => handleActivate(particle)}
+            onPointerDown={() => handleActivate(particle)}
+            onFocus={() => handleActivate(particle)}
             onPointerLeave={() => handlePointerLeave(particle.id)}
             onBlur={() => handlePointerLeave(particle.id)}
             tabIndex={0}
@@ -180,7 +180,7 @@ const ExaminePage = () => {
         );
       })}
 
-      {activeParticle && infoPosition && (
+      {activeParticle && (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -188,9 +188,8 @@ const ExaminePage = () => {
           transition={{ duration: 0.18, ease: "easeOut" }}
           style={{
             position: "fixed",
-            top: infoPosition.y,
-            left: infoPosition.x,
-            transform: "translate(-50%, -100%)",
+            top: 120,
+            left: 24,
             pointerEvents: "none",
             zIndex: 200,
           }}
@@ -208,13 +207,18 @@ const ExaminePage = () => {
           >
             <Chip
               label={activeParticle.label}
-              color="success"
-              sx={{ mb: 1.5, fontWeight: 600 }}
+              sx={{ mb: 1.5, fontWeight: 600, backgroundColor: "#FFD400" }}
               aria-hidden
             />
             <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 500 }}>
               {activeParticle.description}
             </Typography>
+            <Box sx={{ mb: 1.5, display: "flex", gap: 1, alignItems: "center" }}>
+              <img src={health} alt="Health Impact" />
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                Health Impact
+              </Typography>
+            </Box>
             <Typography variant="body2" color="text.secondary">
               {activeParticle.healthImpact}
             </Typography>
@@ -240,56 +244,39 @@ const ExaminePage = () => {
           zIndex: 20,
         }}
       />
-      <motion.div
-        initial={{ x: -48, y: 24, opacity: 0 }}
-        animate={{ x: 24, opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
-      >
-        <Paper
-          elevation={6}
-          sx={{
-            px: 3,
-            py: 2,
-            maxWidth: 400,
-            backgroundColor: "rgba(86, 200, 83, 0.95)",
-          }}
-        >
-          <Typography
-            variant="body1"
-            sx={{
-              fontWeight: 400,
-              fontSize: "1.5rem",
-              color: "#fbfbfb",
-              lineHeight: 1.4,
-            }}
-          >
-            Hover over each particle to learn more{" "}
-          </Typography>
-        </Paper>
-      </motion.div>
-      <motion.div
-        style={{
+      <Fab
+        color="success"
+        aria-label="Go back"
+        onClick={handleNavigatePrevious}
+        sx={{
           position: "absolute",
-          bottom: 32,
-          right: 32,
-          pointerEvents: "auto",
+          bottom: 24,
+          left: 24,
+          width: 72,
+          height: 72,
+          backgroundColor: "#FFD400",
+          "&:hover": { backgroundColor: "#FFE254" },
         }}
       >
-        <Fab
-          color="success"
-          aria-label="Show results"
-          onClick={handleNavigateNext}
-          sx={{
-            width: 72,
-            height: 72,
-            backgroundColor: "#1c8c3a",
-            "&:hover": { backgroundColor: "#56C853" },
-          }}
-        >
-          <ArrowForward sx={{ fontSize: 36 }} />
-        </Fab>
-      </motion.div>
+        <ArrowBackIcon sx={{ fontSize: 36, color: "#000000" }} />
+      </Fab>
+
+      <Fab
+        color="success"
+        aria-label="Show results"
+        onClick={handleNavigateNext}
+        sx={{
+          position: "absolute",
+          bottom: 24,
+          right: 24,
+          width: 72,
+          height: 72,
+          backgroundColor: "#FFD400",
+          "&:hover": { backgroundColor: "#FFE254" },
+        }}
+      >
+        <ArrowForward sx={{ fontSize: 36, color: "#000000" }} />
+      </Fab>
     </Box>
   );
 };

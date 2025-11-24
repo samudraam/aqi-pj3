@@ -1,10 +1,12 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Fab, Paper, Typography } from "@mui/material";
+import { Box, Fab, Typography } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useCity } from "../../providers/use-city";
 import ProcessingSketch from "./processing-sketch-3";
+import Timeline from "../../components/timeline";
+import { AnimatePresence, motion } from "motion/react";
 
 /**
  * AQI visualization screen with WebGL frosted glass camera effect.
@@ -12,6 +14,7 @@ import ProcessingSketch from "./processing-sketch-3";
 const MistPage = () => {
   const { airQualityDetails } = useCity();
   const navigate = useNavigate();
+  const [showSecondText, setShowSecondText] = useState(false);
   //const [ctaVisible, setCtaVisible] = useState<boolean>(false);
 
   useEffect(() => {
@@ -25,12 +28,20 @@ const MistPage = () => {
   // }, []);
 
   const handleNavigateNext = useCallback(() => {
-    navigate("/mist/success");
+    navigate("/examine");
   }, [navigate]);
 
   const handleNavigatePrevious = useCallback(() => {
     navigate("/");
   }, [navigate]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSecondText(true);
+    }, 3000); // 3 seconds
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <Box
@@ -43,37 +54,101 @@ const MistPage = () => {
         position: "relative",
         overflow: "hidden",
       }}
-      // onMouseDown={handleRevealCta}
-      // onTouchStart={handleRevealCta}
     >
+      <Timeline currentStep="discover" />
       <ProcessingSketch />
-      <Paper
-        elevation={6}
+      <Box
         sx={{
-          position: "absolute",
-          top: 24,
-          left: 24,
-          width: 600,
-          height: 100,
-          px: 3,
-          py: 2,
-          maxWidth: 400,
-          backgroundColor: "rgba(101, 159, 65, 0.95)",
-          zIndex: 10, 
+          position: "inherit",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          zIndex: 10,
         }}
       >
-        <Typography
-          variant="body1"
-          sx={{
-            fontWeight: 400,
-            fontSize: "1.5rem",
-            color: "#fbfbfb",
-            lineHeight: 1.5,
-          }}
-        >
-          Push the particles and click next when you're ready!
-        </Typography>
-      </Paper>
+        <AnimatePresence mode="wait">
+          {!showSecondText ? (
+            <motion.div
+              key="first-text"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1, delay: 1 }}
+            >
+              <Typography
+                sx={{
+                  pt: 5,
+                  textAlign: "center",
+                  fontFamily: "Inter",
+                  color: "#000000",
+                  fontSize: { xs: "2rem", sm: "2rem", md: "3rem" },
+                  fontWeight: 500,
+                  lineHeight: 1,
+                  zIndex: 10,
+                }}
+              >
+                There seems to be
+                <br />
+                something in the air...
+              </Typography>
+              <Typography
+                sx={{
+                  pt: 2,
+                  textAlign: "center",
+                  fontFamily: "Inter",
+                  color: "#000000",
+                  fontSize: { xs: "1rem", sm: "1rem", md: "1.5rem" },
+                  fontWeight: 400,
+                  lineHeight: 1.5,
+                  zIndex: 10,
+                }}
+              >
+                Can you disperse these particles?
+              </Typography>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="second-text"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+            >
+              <Typography
+                sx={{
+                  pt: 5,
+                  textAlign: "center",
+                  fontFamily: "Inter",
+                  color: "#000000",
+                  fontSize: { xs: "2rem", sm: "2rem", md: "3rem" },
+                  fontWeight: 500,
+                  lineHeight: 1,
+                  zIndex: 10,
+                }}
+              >
+                It doesn't seem to go away...
+              </Typography>
+              <Typography
+                sx={{
+                  pt: 2,
+                  textAlign: "center",
+                  fontFamily: "Inter",
+                  color: "#000000",
+                  fontSize: { xs: "1rem", sm: "1rem", md: "1.5rem" },
+                  fontWeight: 400,
+                  lineHeight: 1.5,
+                  zIndex: 10,
+                }}
+              >
+                What’s in this mist anyways? 
+                <br />
+                Click the arrow to find out!
+              </Typography>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Box>
 
       <Fab
         color="success"
@@ -85,30 +160,34 @@ const MistPage = () => {
           left: 24,
           width: 72,
           height: 72,
-          backgroundColor: "#659f41",
-          "&:hover": { backgroundColor: "#56C853" },
+          backgroundColor: "#FFD400",
+          "&:hover": { backgroundColor: "#FFE254" },
         }}
       >
-        <ArrowBackIcon sx={{ fontSize: 36 }} />
+        <ArrowBackIcon sx={{ fontSize: 36, color: "#000000" }} />
       </Fab>
-
-      <Fab
-        color="success"
-        aria-label="Show results"
-        onClick={handleNavigateNext}
-        sx={{
-          position: "absolute",
-          bottom: 24,
-          right: 24,
-          width: 72,
-          height: 72,
-          backgroundColor: "#659f41",
-          "&:hover": { backgroundColor: "#56C853" },
-        }}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 3, delay: 3 }}
       >
-        <ArrowForwardIcon sx={{ fontSize: 36 }} />
-      </Fab>
-
+        <Fab
+          color="success"
+          aria-label="Show results"
+          onClick={handleNavigateNext}
+          sx={{
+            position: "absolute",
+            bottom: 24,
+            right: 24,
+            width: 72,
+            height: 72,
+            backgroundColor: "#FFD400",
+            "&:hover": { backgroundColor: "#FFE254" },
+          }}
+        >
+          <ArrowForwardIcon sx={{ fontSize: 36, color: "#000000" }} />
+        </Fab>
+      </motion.div>
       <Box
         component="span"
         aria-live="polite"

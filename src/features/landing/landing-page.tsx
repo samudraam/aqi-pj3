@@ -295,6 +295,35 @@ const LandingPage = () => {
           zIndex: 5,
         }}
       />
+
+      <Box
+        sx={{
+          position: "absolute",
+          bottom: { xs: 16, sm: 24, md: 32 },
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1, sm: 1.25 },
+          backgroundColor: "rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+          zIndex: 15,
+        }}
+      >
+        <Typography
+          sx={{
+            fontFamily: "Inter",
+            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+            color: "#ffffff",
+            textAlign: "center",
+          }}
+        >
+          Brought to you by Ramya, Natalie, Christine
+        </Typography>
+      </Box>
     </Box>
   );
 };
