@@ -74,11 +74,11 @@ const POLLUTANT_KEYS = ["o3", "pm2_5", "pm10", "co", "no2"] as const;
 type PollutantKey = (typeof POLLUTANT_KEYS)[number];
 
 const POLLUTANT_IMAGE_URLS: Record<PollutantKey, string> = {
-  o3: "/particles_O3.png",
-  pm2_5: "/particles_PM2.5.png",
-  pm10: "/particles_PM10.png",
-  co: "/particles-C02.png", // make sure this matches the filename
-  no2: "/particles-NO2.png",
+  o3: "/thumbnail_new_O3.png",
+  pm2_5: "/thumbnail_new_PM2.5.png",
+  pm10: "/thumbnail_new_PM10.png",
+  co: "/thumbnail_new_CO2.png", 
+  no2: "/thumbnail_new_NO2.png",
 };
 
 const POL_COLORS: Record<PollutantKey, string> = {
@@ -90,11 +90,11 @@ const POL_COLORS: Record<PollutantKey, string> = {
 };
 
 const POLLUTANT_LABELS: Record<PollutantKey, string> = {
-  o3: "Ozone (O₃)",
+  o3: "O₃",
   pm2_5: "PM2.5",
   pm10: "PM10",
-  co: "Carbon Monoxide (CO)",
-  no2: "Nitrogen Dioxide (NO₂)",
+  co: "CO",
+  no2: "NO₂",
 };
 
 const LENS_HIGHLIGHT_GROWTH = 1.45;

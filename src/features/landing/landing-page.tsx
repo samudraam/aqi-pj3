@@ -12,11 +12,13 @@ import {
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useCity } from "../../providers/use-city";
 import grass from "../../assets/grass2.png";
+import AboutModal from "../../components/about-modal";
 /**
  * Landing hero for city search.
  */
 const LandingPage = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const { cityQuery, setCityQuery, fetchCityAirQuality, isFetching } =
     useCity();
   const navigate = useNavigate();
@@ -30,6 +32,9 @@ const LandingPage = () => {
       setErrorMessage(null);
     }
   };
+
+  const handleAboutOpen = () => setIsAboutOpen(true);
+  const handleAboutClose = () => setIsAboutOpen(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -67,6 +72,94 @@ const LandingPage = () => {
       }}
     >
       <Box
+        component="header"
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-start",
+          pt: { xs: 3, sm: 4 },
+          zIndex: 20,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            variant="h2"
+            sx={{
+              px: 50,
+              fontFamily: "Inter",
+              fontWeight: 600,
+              fontSize: { xs: "2rem", sm: "2.5rem", md: "2.5rem" },
+              lineHeight: 0.9,
+              color: "#000000",
+            }}
+          >
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.7, delay: 0.7 }}
+            >
+              Pollutant
+              <br />
+              Playground
+            </motion.span>
+          </Typography>
+          <Typography
+            sx={{
+              mt: 2,
+              fontSize: { xs: "0.75rem", sm: "0.875rem", md: "1rem" },
+              fontFamily: "Inter",
+              color: "#000000",
+              opacity: 0.8,
+              maxWidth: "90%",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.7, delay: 0.7 }}
+            >
+              An educational experience about the air you breathe
+            </motion.span>
+          </Typography>
+        </Box>
+
+        <Typography
+          component="a"
+          onClick={handleAboutOpen}
+          sx={{
+            position: "absolute",
+            right: { xs: 20, sm: 32 },
+            top: { xs: 24, sm: 32 },
+            fontFamily: "Inter",
+            textDecoration: "underline",
+            fontSize: { xs: "0.875rem", sm: "1rem" },
+            color: "#000000",
+            cursor: "pointer",
+            "&:hover": {
+              textDecoration: "none",
+              opacity: 0.6,
+            },
+          }}
+        >
+          About
+        </Typography>
+      </Box>
+
+      <AboutModal open={isAboutOpen} onClose={handleAboutClose} />
+
+      <Box
         component="form"
         onSubmit={handleSubmit}
         noValidate
@@ -77,7 +170,7 @@ const LandingPage = () => {
           flexDirection: "column",
           alignItems: "center",
           textAlign: "center",
-          marginBottom: { xs: 10, sm: 4, md: 35},
+          marginBottom: { xs: 10, sm: 4, md: 35 },
           gap: { xs: 3, sm: 4 },
           zIndex: 12,
         }}
@@ -87,7 +180,7 @@ const LandingPage = () => {
           component="h1"
           color="#000000"
           sx={{
-            fontFamily: 'Antipol-Bold',
+            fontFamily: "Antipol-Bold",
             fontSize: { xs: "2.25rem", sm: "3rem", md: "4.5rem" },
             letterSpacing: { xs: 0.5, sm: 1 },
           }}

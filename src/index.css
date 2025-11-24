@@ -1,5 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
 :root {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: #0f172a;
@@ -12,11 +15,26 @@
 
 /* Fonts */
 @font-face {
-  font-family: 'Antipol-Bold';
-  src: url('./assets/font/Antipol-Bold.otf') format('opentype');
+  font-family: "Antipol-Bold";
+  src: url("./assets/font/Antipol-Bold.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
 }
+
+@font-face {
+  font-family: "Antipol";
+  src: url("./assets/font/Antipol.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.inter-regular {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 
 * {
   box-sizing: border-box;
