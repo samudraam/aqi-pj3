@@ -1,16 +1,16 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import type { FormEvent } from "react";
 import {
   Box,
   TextField,
   Typography,
-  Button,
   Paper,
   Collapse,
   IconButton,
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Fab,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -19,36 +19,40 @@ import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import ProcessingSketch2 from "./processing-sketch-3";
 import ParticlesSketch3 from "./particles-sketch-3";
 import { useCity } from "../../providers/use-city";
+import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import Timeline from "../../components/timeline";
+import { useNavigate } from "react-router-dom";
+import { AqiSlider } from "../../components/aqi-slider";
 
 // Particle type labels, descriptions, and images
 const POLLUTANT_INFO = {
   o3: {
     label: "Ozone (O₃)",
-    imageUrl: "/particles_O3.png",
+    imageUrl: "/thumbnail_new_O3.png",
     description:
       "Ozone is a reactive gas that forms when nitrogen oxides and volatile organic compounds react in sunlight. Ground-level ozone can cause respiratory problems and aggravate asthma. High levels are often associated with sunny, stagnant weather conditions.",
   },
   pm2_5: {
     label: "PM2.5",
-    imageUrl: "/particles_PM2.5.png",
+    imageUrl: "/thumbnail_new_PM2.5.png",
     description:
       "Fine particulate matter with diameter less than 2.5 micrometers. These tiny particles can penetrate deep into the lungs and even enter the bloodstream, causing cardiovascular and respiratory issues. Sources include vehicle exhaust, industrial emissions, and wildfires.",
   },
   pm10: {
     label: "PM10",
-    imageUrl: "/particles_PM10.png",
+    imageUrl: "/thumbnail_new_PM10.png",
     description:
       "Particulate matter with diameter less than 10 micrometers. These larger particles can irritate the eyes, nose, and throat. Common sources include dust from roads, construction sites, and agricultural activities.",
   },
   co: {
     label: "Carbon Monoxide (CO)",
-    imageUrl: "/particles-C02.png",
+    imageUrl: "/thumbnail_new_CO2.png",
     description:
       "A colorless, odorless gas produced by incomplete combustion of carbon-based fuels. High levels primarily come from vehicle emissions. Carbon monoxide reduces the blood's ability to carry oxygen, which can be particularly dangerous for people with heart conditions.",
   },
   no2: {
     label: "Nitrogen Dioxide (NO₂)",
-    imageUrl: "/particles-NO2.png",
+    imageUrl: "/thumbnail_new_NO2.png",
     description:
       "A reddish-brown gas produced by burning fossil fuels, especially in vehicles and power plants. Nitrogen dioxide can irritate airways and worsen respiratory conditions like asthma. It also contributes to the formation of ground-level ozone and fine particles.",
   },
@@ -62,7 +66,6 @@ export const OptimizedDebugParticlesOnly = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { cityQuery, airQualityDetails, fetchCityAirQuality, isFetching } =
     useCity();
-  const [isExpanded, setIsExpanded] = useState(false);
   const [isInfoCollapsed, setIsInfoCollapsed] = useState(false);
   const [inputValue, setInputValue] = useState(
     airQualityDetails?.cityName || cityQuery || ""
@@ -75,6 +78,8 @@ export const OptimizedDebugParticlesOnly = () => {
   const [expandedParticles, setExpandedParticles] = useState<
     Record<string, boolean>
   >({});
+  const navigate = useNavigate();
+  const currentTimelineStep = showParticlesSketch ? "Microview" : "Macroview";
 
   /**
    * Updates input value when airQualityDetails changes
@@ -119,6 +124,20 @@ export const OptimizedDebugParticlesOnly = () => {
       setTransitionDirection(null);
     }, 600); // Match transition duration
   };
+
+  /**
+   * Handles navigation to previous page
+   */
+  const handleNavigatePrevious = useCallback(() => {
+    navigate("/examine");
+  }, [navigate]);
+
+  /**
+   * Handles navigation to next page
+   */
+  const handleNavigateNext = useCallback(() => {
+    navigate("/conclusion");
+  }, [navigate]);
 
   /**
    * Handles zoom out button click to return to processing sketch
@@ -222,6 +241,45 @@ export const OptimizedDebugParticlesOnly = () => {
         overflow: "hidden",
       }}
     >
+      {/* Timeline Component */}
+      <Timeline currentStep={currentTimelineStep} />
+
+      {/* Navigation Buttons - Top Left and Right */}
+      <Fab
+        color="success"
+        aria-label="Go back"
+        onClick={handleNavigatePrevious}
+        sx={{
+          position: "fixed",
+          top: 24,
+          left: 24,
+          width: 72,
+          height: 72,
+          backgroundColor: "#FFD400",
+          "&:hover": { backgroundColor: "#FFE254" },
+          zIndex: 1002,
+        }}
+      >
+        <ArrowBack sx={{ fontSize: 36, color: "#000000" }} />
+      </Fab>
+      <Fab
+        color="success"
+        aria-label="Show results"
+        onClick={handleNavigateNext}
+        sx={{
+          position: "fixed",
+          top: 24,
+          right: 24,
+          width: 72,
+          height: 72,
+          backgroundColor: "#FFD400",
+          "&:hover": { backgroundColor: "#FFE254" },
+          zIndex: 1002,
+        }}
+      >
+        <ArrowForward sx={{ fontSize: 36, color: "#000000" }} />
+      </Fab>
+
       {/* Transition overlay for zoom blur effect */}
       {isTransitioning && (
         <div
@@ -255,16 +313,17 @@ export const OptimizedDebugParticlesOnly = () => {
           width: "100%",
           height: "100%",
           // Visible when showParticlesSketch is false OR during transitions
-          visibility: showParticlesSketch && !isTransitioning ? "hidden" : "visible",
+          visibility:
+            showParticlesSketch && !isTransitioning ? "hidden" : "visible",
           opacity: showParticlesSketch && !isTransitioning ? 0 : 1,
           zIndex: showParticlesSketch ? 1 : 2, // Lower z-index when inactive
           pointerEvents: showParticlesSketch ? "none" : "auto",
-          
+
           // Apply transition effects
-          transform: isZoomingIn ? "scale(1.5)" : "scale(1)",
+          transform: isZoomingIn ? "scale(2)" : "scale(1)",
           filter: isZoomingIn ? "blur(20px)" : "blur(0px)",
-          transition: isTransitioning 
-            ? "transform 0.6s ease-out, filter 0.6s ease-out, opacity 0.6s ease-out" 
+          transition: isTransitioning
+            ? "transform 0.6s ease-out, filter 0.6s ease-out, opacity 0.6s ease-out"
             : "none",
         }}
       >
@@ -280,17 +339,22 @@ export const OptimizedDebugParticlesOnly = () => {
           width: "100%",
           height: "100%",
           // Visible when showParticlesSketch is true OR during transitions
-          visibility: !showParticlesSketch && !isTransitioning ? "hidden" : "visible",
+          visibility:
+            !showParticlesSketch && !isTransitioning ? "hidden" : "visible",
           opacity: !showParticlesSketch && !isTransitioning ? 0 : 1,
           zIndex: showParticlesSketch ? 2 : 1, // Higher z-index when active
           pointerEvents: showParticlesSketch ? "auto" : "none",
 
           // Apply transition effects
-          animation: isZoomingOut ? "none" : (showParticlesSketch && !isTransitioning ? "none" : undefined), // Only animate if needed
-          transform: isZoomingOut ? "scale(0.85)" : "scale(1)",
+          animation: isZoomingOut
+            ? "none"
+            : showParticlesSketch && !isTransitioning
+            ? "none"
+            : undefined, // Only animate if needed
+          transform: isZoomingOut ? "scale(0.15)" : "scale(1)",
           filter: isZoomingOut ? "blur(12px)" : "blur(0px)",
-          transition: isTransitioning 
-            ? "transform 0.6s ease-out, filter 0.6s ease-out, opacity 0.6s ease-out" 
+          transition: isTransitioning
+            ? "transform 0.6s ease-out, filter 0.6s ease-out, opacity 0.6s ease-out"
             : "none",
         }}
       >
@@ -554,52 +618,14 @@ export const OptimizedDebugParticlesOnly = () => {
                 </Typography>
               </Box>
 
-              {/* Expandable Section */}
-              <Button
-                fullWidth
-                onClick={() => setIsExpanded(!isExpanded)}
-                endIcon={isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              <Box
                 sx={{
-                  marginBottom: isExpanded ? "1rem" : 0,
-                  textTransform: "none",
-                  color: "#1976d2",
-                  justifyContent: "space-between",
-                  padding: "0.5rem",
+                  marginBottom: "1rem",
                 }}
               >
-                Understand more about air quality and visibility
-              </Button>
-
-              <Collapse in={isExpanded}>
-                <Box
-                  sx={{
-                    padding: "1rem",
-                    backgroundColor: "rgba(25, 118, 210, 0.05)",
-                    borderRadius: "8px",
-                    border: "1px solid rgba(25, 118, 210, 0.2)",
-                  }}
-                >
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "#555",
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    Air quality and visibility are closely related. When the Air
-                    Quality Index (AQI) is high, it indicates elevated levels of
-                    particulate matter (PM2.5 and PM10) and other pollutants in
-                    the atmosphere. These particles when paired with the right
-                    atmospheric conditions can scatter and absorb light,
-                    reducing visibility. High particle concentration can cause
-                    hazy air conditions, making distant objects appear less
-                    clear. Fine particulate matter, particularly PM2.5, is a
-                    major contributor to visible pollution due to its small size
-                    and unique chemical properties that allow it to scatter
-                    light more effectively.
-                  </Typography>
-                </Box>
-              </Collapse>
+                <AqiSlider aqi={aqi} />
+              </Box>
+              
             </>
           )}
         </Collapse>
@@ -672,5 +698,3 @@ export const OptimizedDebugParticlesOnly = () => {
     </div>
   );
 };
-
-
