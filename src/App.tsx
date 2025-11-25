@@ -15,7 +15,7 @@ import ConclusionPage from "./features/processing/conclusion";
 const App = () => (
   <CityProvider>
     <CssBaseline />
-    <HashRouter basename={import.meta.env.BASE_URL}>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/mist" element={<MistPage />} />
