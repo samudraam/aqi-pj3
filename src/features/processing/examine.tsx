@@ -76,16 +76,84 @@ const baseParticles: ParticleMeta[] = [
 ];
 
 const ExaminePage = () => {
-  const particleInstances = useMemo<ParticleInstance[]>(
-    () =>
-      baseParticles.map((particle) => ({
+  /**
+   * Generates non-overlapping particle positions using collision detection.
+   * Particles are 96x96 pixels, so we ensure minimum spacing between them.
+   */
+  const particleInstances = useMemo<ParticleInstance[]>(() => {
+    // Assume viewport dimensions for collision detection calculations
+    // Using a standard desktop viewport size
+    const viewportWidth = 1920;
+    const viewportHeight = 1080;
+
+    // Particle dimensions in pixels
+    const particleSize = 96;
+    // Minimum spacing between particles (particle size + padding)
+    const minSpacing = particleSize + 20;
+
+    // Define valid placement area (avoiding info box on left and buttons on bottom)
+    const minTopPercent = 15;
+    const maxTopPercent = 75; // Leave space for bottom buttons
+    const minLeftPercent = 30; // Avoid info box area (~400px)
+    const maxLeftPercent = 80;
+
+    const placedParticles: Array<{ top: number; left: number }> = [];
+    const maxAttempts = 1000;
+
+    return baseParticles.map((particle) => {
+      let attempts = 0;
+      let topPercent = minTopPercent;
+      let leftPercent = minLeftPercent;
+      let isValidPosition = false;
+
+      // Try to find a non-overlapping position
+      while (!isValidPosition && attempts < maxAttempts) {
+        topPercent = Math.round(
+          minTopPercent + Math.random() * (maxTopPercent - minTopPercent)
+        );
+        leftPercent = Math.round(
+          minLeftPercent + Math.random() * (maxLeftPercent - minLeftPercent)
+        );
+
+        // Convert percentages to pixel coordinates for collision detection
+        const topPx = (topPercent / 100) * viewportHeight;
+        const leftPx = (leftPercent / 100) * viewportWidth;
+
+        // Check collision with all previously placed particles
+        isValidPosition = placedParticles.every((placed) => {
+          const placedTopPx = (placed.top / 100) * viewportHeight;
+          const placedLeftPx = (placed.left / 100) * viewportWidth;
+
+          // Calculate distance between particle centers
+          const centerTopPx = topPx + particleSize / 2;
+          const centerLeftPx = leftPx + particleSize / 2;
+          const placedCenterTopPx = placedTopPx + particleSize / 2;
+          const placedCenterLeftPx = placedLeftPx + particleSize / 2;
+
+          const distanceX = Math.abs(centerLeftPx - placedCenterLeftPx);
+          const distanceY = Math.abs(centerTopPx - placedCenterTopPx);
+
+          // Check if particles overlap (distance between centers should be >= minSpacing)
+          return distanceX >= minSpacing || distanceY >= minSpacing;
+        });
+
+        attempts++;
+      }
+
+      // If we couldn't find a position after max attempts, use the last generated position
+      // This should rarely happen with 5 particles
+      const finalTop = topPercent;
+      const finalLeft = leftPercent;
+
+      placedParticles.push({ top: finalTop, left: finalLeft });
+
+      return {
         ...particle,
-        top: `${Math.round(15 + Math.random() * 60)}%`,
-        // Start particles from 30% to avoid the info box area on the left (which is ~400px wide)
-        left: `${Math.round(30 + Math.random() * 50)}%`,
-      })),
-    []
-  );
+        top: `${finalTop}%`,
+        left: `${finalLeft}%`,
+      };
+    });
+  }, []);
 
   const [activeParticle, setActiveParticle] = useState<ParticleInstance | null>(
     null
@@ -213,9 +281,15 @@ const ExaminePage = () => {
             <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 500 }}>
               {activeParticle.description}
             </Typography>
-            <Box sx={{ mb: 1.5, display: "flex", gap: 1, alignItems: "center" }}>
+            <Box
+              sx={{ mb: 1.5, display: "flex", gap: 1, alignItems: "center" }}
+            >
               <img src={health} alt="Health Impact" />
-              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ fontWeight: 600 }}
+              >
                 Health Impact
               </Typography>
             </Box>

@@ -181,7 +181,8 @@ const LandingPage = () => {
           color="#000000"
           sx={{
             fontFamily: "Antipol-Bold",
-            fontSize: { xs: "2.25rem", sm: "3rem", md: "4.5rem" },
+            mt: 10,
+            fontSize: { xs: "2.25rem", sm: "3rem", md: "4rem" },
             letterSpacing: { xs: 0.5, sm: 1 },
           }}
         >
