@@ -15,13 +15,16 @@ import ConclusionPage from "./features/processing/conclusion";
 const App = () => (
   <CityProvider>
     <CssBaseline />
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/mist" element={<MistPage />} />
         <Route path="/examine" element={<ExaminePage />} />
         <Route path="/more" element={<MorePage />} />
-        <Route path="/particles-debug" element={<OptimizedDebugParticlesOnly />} />
+        <Route
+          path="/particles-debug"
+          element={<OptimizedDebugParticlesOnly />}
+        />
         <Route path="/particle-view" element={<ParticleView />} />
         <Route path="/conclusion" element={<ConclusionPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
