@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import { CssBaseline } from "@mui/material";
 import CityProvider from "./providers/city-provider";
 import LandingPage from "./features/landing/landing-page";
@@ -15,7 +15,7 @@ import ConclusionPage from "./features/processing/conclusion";
 const App = () => (
   <CityProvider>
     <CssBaseline />
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <HashRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/mist" element={<MistPage />} />
@@ -29,7 +29,7 @@ const App = () => (
         <Route path="/conclusion" element={<ConclusionPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   </CityProvider>
 );
 
