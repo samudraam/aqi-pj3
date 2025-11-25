@@ -110,7 +110,7 @@ export const OptimizedDebugParticlesOnly = () => {
   /**
    * Handles zoom button click to transition to particles sketch
    */
-  const handleZoomClick = () => {
+  const handleZoomClick = useCallback(() => {
     if (isTransitioning || showParticlesSketch) {
       return;
     }
@@ -123,26 +123,12 @@ export const OptimizedDebugParticlesOnly = () => {
       setIsTransitioning(false);
       setTransitionDirection(null);
     }, 600); // Match transition duration
-  };
-
-  /**
-   * Handles navigation to previous page
-   */
-  const handleNavigatePrevious = useCallback(() => {
-    navigate("/examine");
-  }, [navigate]);
-
-  /**
-   * Handles navigation to next page
-   */
-  const handleNavigateNext = useCallback(() => {
-    navigate("/conclusion");
-  }, [navigate]);
+  }, [isTransitioning, showParticlesSketch]);
 
   /**
    * Handles zoom out button click to return to processing sketch
    */
-  const handleZoomOutClick = () => {
+  const handleZoomOutClick = useCallback(() => {
     if (isTransitioning || !showParticlesSketch) {
       return;
     }
@@ -154,7 +140,37 @@ export const OptimizedDebugParticlesOnly = () => {
       setIsTransitioning(false);
       setTransitionDirection(null);
     }, 600);
-  };
+  }, [isTransitioning, showParticlesSketch]);
+
+  /**
+   * Handles navigation to previous page
+   * In particles view: zooms out to processing view
+   * In processing view: navigates to examine page
+   */
+  const handleNavigatePrevious = useCallback(() => {
+    if (showParticlesSketch) {
+      // In particles view, zoom out to processing view
+      handleZoomOutClick();
+    } else {
+      // In processing view, navigate to previous page
+      navigate("/examine");
+    }
+  }, [navigate, showParticlesSketch, handleZoomOutClick]);
+
+  /**
+   * Handles navigation to next page
+   * In processing view: zooms in to particles view
+   * In particles view: navigates to conclusion page
+   */
+  const handleNavigateNext = useCallback(() => {
+    if (!showParticlesSketch) {
+      // In processing view, zoom in to particles view
+      handleZoomClick();
+    } else {
+      // In particles view, navigate to conclusion page
+      navigate("/conclusion");
+    }
+  }, [navigate, showParticlesSketch, handleZoomClick]);
 
   /**
    * Handles particle accordion expand/collapse
@@ -625,7 +641,6 @@ export const OptimizedDebugParticlesOnly = () => {
               >
                 <AqiSlider aqi={aqi} />
               </Box>
-              
             </>
           )}
         </Collapse>
