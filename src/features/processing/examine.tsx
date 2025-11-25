@@ -2,17 +2,17 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import { Box, Typography, Paper, Chip, Fab } from "@mui/material";
 import { motion } from "framer-motion";
 import magnifierSrc from "../../assets/magnifier.png";
-import particleO3 from "/thumbnail_new_O3.png";
-import particlePM25 from "/thumbnail_new_PM2.5.png";
-import particlePM10 from "/thumbnail_new_PM10.png";
-import particleCO2 from "/thumbnail_new_CO2.png";
-import particleNO2 from "/thumbnail_new_NO2.png";
+const particleO3 = `${import.meta.env.BASE_URL}thumbnail_new_O3.png`;
+const particlePM25 = `${import.meta.env.BASE_URL}thumbnail_new_PM2.5.png`;
+const particlePM10 = `${import.meta.env.BASE_URL}thumbnail_new_PM10.png`;
+const particleCO2 = `${import.meta.env.BASE_URL}thumbnail_new_CO2.png`;
+const particleNO2 = `${import.meta.env.BASE_URL}thumbnail_new_NO2.png`;
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
 import Timeline from "../../components/timeline";
 type ParticleId = "pm10" | "pm25" | "o3" | "co" | "no2";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import health from "/health.png";
+const health = `${import.meta.env.BASE_URL}health.png`;
 
 type ParticleMeta = {
   id: ParticleId;

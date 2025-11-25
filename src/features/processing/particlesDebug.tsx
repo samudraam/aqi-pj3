@@ -29,31 +29,31 @@ import { AqiSlider } from "../../components/aqi-slider";
 const POLLUTANT_INFO = {
   o3: {
     label: "Ozone (O₃)",
-    imageUrl: "/thumbnail_new_O3.png",
+    imageUrl: `${import.meta.env.BASE_URL}thumbnail_new_O3.png`,
     description:
       "Ozone is a reactive gas that forms when nitrogen oxides and volatile organic compounds react in sunlight. Ground-level ozone can cause respiratory problems and aggravate asthma. High levels are often associated with sunny, stagnant weather conditions.",
   },
   pm2_5: {
     label: "PM2.5",
-    imageUrl: "/thumbnail_new_PM2.5.png",
+    imageUrl: `${import.meta.env.BASE_URL}thumbnail_new_PM2.5.png`,
     description:
       "Fine particulate matter with diameter less than 2.5 micrometers. These tiny particles can penetrate deep into the lungs and even enter the bloodstream, causing cardiovascular and respiratory issues. Sources include vehicle exhaust, industrial emissions, and wildfires.",
   },
   pm10: {
     label: "PM10",
-    imageUrl: "/thumbnail_new_PM10.png",
+    imageUrl: `${import.meta.env.BASE_URL}thumbnail_new_PM10.png`,
     description:
       "Particulate matter with diameter less than 10 micrometers. These larger particles can irritate the eyes, nose, and throat. Common sources include dust from roads, construction sites, and agricultural activities.",
   },
   co: {
     label: "Carbon Monoxide (CO)",
-    imageUrl: "/thumbnail_new_CO2.png",
+    imageUrl: `${import.meta.env.BASE_URL}thumbnail_new_CO2.png`,
     description:
       "A colorless, odorless gas produced by incomplete combustion of carbon-based fuels. High levels primarily come from vehicle emissions. Carbon monoxide reduces the blood's ability to carry oxygen, which can be particularly dangerous for people with heart conditions.",
   },
   no2: {
     label: "Nitrogen Dioxide (NO₂)",
-    imageUrl: "/thumbnail_new_NO2.png",
+    imageUrl: `${import.meta.env.BASE_URL}thumbnail_new_NO2.png`,
     description:
       "A reddish-brown gas produced by burning fossil fuels, especially in vehicles and power plants. Nitrogen dioxide can irritate airways and worsen respiratory conditions like asthma. It also contributes to the formation of ground-level ozone and fine particles.",
   },

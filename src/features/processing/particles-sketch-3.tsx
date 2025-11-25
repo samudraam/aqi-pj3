@@ -74,11 +74,11 @@ const POLLUTANT_KEYS = ["o3", "pm2_5", "pm10", "co", "no2"] as const;
 type PollutantKey = (typeof POLLUTANT_KEYS)[number];
 
 const POLLUTANT_IMAGE_URLS: Record<PollutantKey, string> = {
-  o3: "/thumbnail_new_O3.png",
-  pm2_5: "/thumbnail_new_PM2.5.png",
-  pm10: "/thumbnail_new_PM10.png",
-  co: "/thumbnail_new_CO2.png",
-  no2: "/thumbnail_new_NO2.png",
+  o3: `${import.meta.env.BASE_URL}thumbnail_new_O3.png`,
+  pm2_5: `${import.meta.env.BASE_URL}thumbnail_new_PM2.5.png`,
+  pm10: `${import.meta.env.BASE_URL}thumbnail_new_PM10.png`,
+  co: `${import.meta.env.BASE_URL}thumbnail_new_CO2.png`,
+  no2: `${import.meta.env.BASE_URL}thumbnail_new_NO2.png`,
 };
 
 const POL_COLORS: Record<PollutantKey, string> = {
