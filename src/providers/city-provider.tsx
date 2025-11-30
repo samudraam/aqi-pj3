@@ -23,6 +23,7 @@ export interface AirQualityDetails {
   effectStrength: number;
   targetCount: number;
   components: AirQualityComponents;
+  visibility: number | null;
 }
 
 interface CityProviderProps {
@@ -118,6 +119,35 @@ const CityProvider = ({ children }: CityProviderProps) => {
         const targetCount = Math.round(mapRange(aqi ?? 3, 1, 5, 80, 300));
         const components = buildComponentMap(measurement?.components ?? {});
 
+        // Fetch visibility from One Call API 3.0
+        let visibility: number | null = null;
+        try {
+          const oneCallURL = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&appid=${encodeURIComponent(
+            apiKey
+          )}`;
+          const oneCallResponse = await fetch(oneCallURL);
+          if (oneCallResponse.ok) {
+            const oneCallData = (await oneCallResponse.json()) as {
+              current?: { visibility?: number };
+            };
+            if (
+              typeof oneCallData.current?.visibility === "number" &&
+              Number.isFinite(oneCallData.current.visibility)
+            ) {
+              visibility = oneCallData.current.visibility;
+            }
+          } else {
+            console.warn(
+              "One Call API 3.0 unavailable. Visibility data will not be used."
+            );
+          }
+        } catch (error) {
+          console.warn(
+            "Error fetching visibility data from One Call API 3.0:",
+            error
+          );
+        }
+
         setAirQualityDetails({
           cityName: name ?? trimmedCity,
           state,
@@ -129,6 +159,7 @@ const CityProvider = ({ children }: CityProviderProps) => {
           effectStrength,
           targetCount,
           components,
+          visibility,
         });
 
         return { success: true };
