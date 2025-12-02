@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Chip } from "@mui/material";
 
 /**
  * AQI color segments matching the gradient from green to purple
@@ -183,18 +183,32 @@ export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
                 }}
               />
               {/* Label */}
-              <Typography
-                variant="caption"
-                sx={{
-                  fontSize: "0.7rem",
-                  fontWeight: isActive ? 800 : 400,
-                  color: isActive ? "#000000" : "rgba(0, 0, 0, 0.6)",
-                  textAlign: "center",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                {segment.label}
-              </Typography>
+              {isActive ? (
+                <Chip
+                  label={segment.label}
+                  size="small"
+                  sx={{
+                    fontSize: "0.7rem",
+                    fontWeight: 800,
+                    backgroundColor: "#ffd400",
+                    border: "1px solid rgba(0, 0, 0, 0.2)",
+                    color: "#000000",
+                  }}
+                />
+              ) : (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontSize: "0.7rem",
+                    fontWeight: 400,
+                    color: "rgba(0, 0, 0, 0.6)",
+                    textAlign: "center",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  {segment.label}
+                </Typography>
+              )}
             </Box>
           );
         })}

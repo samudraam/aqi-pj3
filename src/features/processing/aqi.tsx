@@ -20,6 +20,19 @@ const AQI_FACTORS = [
 
 type FactorId = (typeof AQI_FACTORS)[number]["id"];
 
+const FACTOR_DETAILS: Record<FactorId, string> = {
+  wind:
+    "Strong winds can disperse pollutants and carry them over long distances, preventing them from accumulating in one area.",
+  temperature:
+    "High temperatures and sunlight increases the formation of ground-level ozone.",
+  humidity:
+    "High humidity can increase chemical reactions for sulfur dioxide, ozone, and nitrogen oxides. Water vapor can cause fine particles (PM2.5 and PM10) to absorb moisture, growing larger and staying suspended in the air longer.",
+  precipitation:
+    'Rain can help "wash" pollutants out of the air. However, pollutants may react with water to form acidic compounds, leading to acid rain.',
+  industry:
+    "Human activities, such as vehicle usage, factories, power plants, and agriculture are all sources for pollutants.",
+};
+
 /**
  * AQI educational page explaining the Air Quality Index scale and factors
  */
@@ -57,6 +70,8 @@ const AqiPage = () => {
 
   // Convert AQI to 1-5 scale (it's already in that format from the API)
   const aqiValue = airQualityDetails?.aqi ?? null;
+  const selectedFactorLabel =
+    AQI_FACTORS.find((factor) => factor.id === selectedFactor)?.label ?? "";
 
   return (
     <Box
@@ -65,7 +80,7 @@ const AqiPage = () => {
       sx={{
         minHeight: "100vh",
         minWidth: "100vw",
-        background: "linear-gradient(to bottom, #E6F3FF 0%, #87CEEB 100%)",
+        background: "linear-gradient(to bottom, #FFFFFF 0%, #1B9CD0 100%)",
         position: "relative",
         overflow: "auto",
         display: "flex",
@@ -120,7 +135,7 @@ const AqiPage = () => {
           alignItems: "center",
           justifyContent: "center",
           paddingX: { xs: 3, sm: 4, md: 6 },
-          paddingY: { xs: 8, sm: 10, md: 12 },
+          paddingY: { xs: 6, sm: 8, md: 4 },
           gap: { xs: 3, sm: 4, md: 5 },
           maxWidth: "1200px",
           margin: "0 auto",
@@ -180,7 +195,7 @@ const AqiPage = () => {
             display: "flex",
             flexDirection: "column",
             gap: 2,
-            marginTop: { xs: 2, sm: 3 },
+            marginTop: 1,
           }}
         >
           {/* Scale Labels */}
@@ -223,7 +238,7 @@ const AqiPage = () => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              paddingX: 1,
+              paddingX: 0.5,
               marginTop: 1,
             }}
           >
@@ -239,7 +254,7 @@ const AqiPage = () => {
                 sx={{
                   fontFamily: "Inter, sans-serif",
                   fontSize: { xs: "0.75rem", sm: "0.875rem", md: "1rem" },
-                  fontWeight: 500,
+                  fontWeight: 600,
                   color: "#000000",
                   textAlign: "center",
                   flex: 1,
@@ -259,7 +274,7 @@ const AqiPage = () => {
             display: "flex",
             flexDirection: "column",
             gap: 2,
-            marginTop: { xs: 3, sm: 4, md: 5 },
+            marginTop: { xs: 3, sm: 4, md: 2 },
           }}
         >
           <Typography
@@ -316,6 +331,55 @@ const AqiPage = () => {
                 </Button>
               );
             })}
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              width: "100%",
+            }}
+          >
+            <Box
+              role="dialog"
+              aria-live="polite"
+              aria-label={`Details about ${selectedFactorLabel}`}
+              sx={{
+                marginTop: { xs: 2, sm: 2.5 },
+                backgroundColor: "rgba(255,255,255,0.96)",
+                borderRadius: "18px",
+                boxShadow: "0 12px 32px rgba(0, 0, 0, 0.16)",
+                border: "1px solid rgba(0, 0, 0, 0.08)",
+                padding: { xs: 2, sm: 3 },
+                maxWidth: "900px",
+                width: "100%",
+              }}
+            >
+              <Typography
+                component="h3"
+                sx={{
+                  fontFamily: "Inter, sans-serif",
+                  fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.35rem" },
+                  fontWeight: 700,
+                  color: "#000000",
+                  marginBottom: 1,
+                }}
+              >
+                {selectedFactorLabel}
+              </Typography>
+              <Typography
+                component="p"
+                sx={{
+                  fontFamily: "Inter, sans-serif",
+                  fontSize: { xs: "0.95rem", sm: "1.05rem", md: "1.1rem" },
+                  fontWeight: 400,
+                  color: "#000000",
+                  lineHeight: 1.6,
+                }}
+              >
+                {FACTOR_DETAILS[selectedFactor]}
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Box>

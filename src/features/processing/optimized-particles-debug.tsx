@@ -10,11 +10,10 @@ import {
   AccordionSummary,
   AccordionDetails,
   Fab,
+  Button,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import ProcessingSketch2 from "./processing-sketch-3";
 import ParticlesSketch3 from "./particles-sketch-3";
 import { useCity } from "../../providers/use-city";
@@ -23,6 +22,7 @@ import Timeline from "../../components/timeline";
 import { useNavigate } from "react-router-dom";
 import { AqiSlider } from "../../components/aqi-slider";
 import CityAutocomplete from "../../components/city-autocomplete";
+import { PieChart, Pie, Cell } from "recharts";
 
 // Particle type labels, descriptions, and images
 const POLLUTANT_INFO = {
@@ -58,6 +58,14 @@ const POLLUTANT_INFO = {
   },
 } as const;
 
+const POLLUTANT_COLORS: Record<keyof typeof POLLUTANT_INFO, string> = {
+  o3: "#2D7ED8",
+  pm2_5: "#4FC3F7",
+  pm10: "#FFCA28",
+  co: "#27AE60",
+  no2: "#6C4A2D",
+};
+
 /**
  * Debug page component that displays the processing sketch.
  * Optimized to keep both sketches mounted for smoother transitions.
@@ -78,8 +86,11 @@ export const OptimizedDebugParticlesOnly = () => {
   const [expandedParticles, setExpandedParticles] = useState<
     Record<string, boolean>
   >({});
+  const [particleViewMode, setParticleViewMode] = useState<"list" | "pie">(
+    "list"
+  );
   const navigate = useNavigate();
-  const currentTimelineStep = showParticlesSketch ? "Microview" : "Macroview";
+  const currentTimelineStep = showParticlesSketch ? "micro" : "macro";
 
   /**
    * Updates input value when airQualityDetails changes
@@ -89,6 +100,15 @@ export const OptimizedDebugParticlesOnly = () => {
       setInputValue(airQualityDetails.cityName);
     }
   }, [airQualityDetails]);
+
+  /**
+   * Reset particle info view when leaving particles sketch
+   */
+  useEffect(() => {
+    if (!showParticlesSketch) {
+      setParticleViewMode("list");
+    }
+  }, [showParticlesSketch]);
 
   /**
    * Handles city form submission
@@ -176,14 +196,26 @@ export const OptimizedDebugParticlesOnly = () => {
   };
 
   /**
+   * Normalize target particle count to a positive integer
+   */
+  const resolvedTargetCount = (() => {
+    const parsed = Number(airQualityDetails?.targetCount);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return 150;
+    }
+    return Math.max(1, Math.round(parsed));
+  })();
+
+  /**
    * Calculate particle counts based on air quality components
    * This approximates what's displayed in the sketch
    */
   const getParticleCounts = () => {
-    if (!airQualityDetails?.components) return null;
+    if (!airQualityDetails?.components) {
+      return null;
+    }
 
     const components = airQualityDetails.components;
-    const targetCount = airQualityDetails.targetCount || 150;
 
     // Calculate total of relevant pollutants
     const relevantKeys: Array<keyof typeof POLLUTANT_INFO> = [
@@ -193,13 +225,27 @@ export const OptimizedDebugParticlesOnly = () => {
       "co",
       "no2",
     ];
+
+    const sanitizeValue = (rawValue: unknown) => {
+      const parsed = Number(rawValue);
+      if (!Number.isFinite(parsed) || parsed < 0) {
+        return 0;
+      }
+      return parsed;
+    };
+
+    const sanitizedComponents = relevantKeys.reduce((acc, key) => {
+      acc[key] = sanitizeValue(components[key]);
+      return acc;
+    }, {} as Record<keyof typeof POLLUTANT_INFO, number>);
+
     const total = relevantKeys.reduce((sum, key) => {
-      return sum + Math.max(0, components[key] || 0);
+      return sum + sanitizedComponents[key];
     }, 0);
 
     if (total <= 1e-9) {
       // Equal distribution if no data
-      const equalCount = Math.floor(targetCount / relevantKeys.length);
+      const equalCount = Math.floor(resolvedTargetCount / relevantKeys.length);
       return relevantKeys.reduce((acc, key) => {
         acc[key] = equalCount;
         return acc;
@@ -207,15 +253,19 @@ export const OptimizedDebugParticlesOnly = () => {
     }
 
     // Proportional distribution
-    return relevantKeys.reduce((acc, key) => {
-      const value = Math.max(0, components[key] || 0);
-      acc[key] = Math.floor((value / total) * targetCount);
+    const proportionalCounts = relevantKeys.reduce((acc, key) => {
+      const value = sanitizedComponents[key];
+      const fraction = value / total;
+      const scaledCount = fraction * resolvedTargetCount;
+      acc[key] = Number.isFinite(scaledCount) ? Math.floor(scaledCount) : 0;
       return acc;
     }, {} as Record<string, number>);
+
+    return proportionalCounts;
   };
 
   const particleCounts = getParticleCounts();
-  const particleCount = airQualityDetails?.targetCount || 150;
+  const particleCount = resolvedTargetCount;
   const aqi = airQualityDetails?.aqi;
   const aqiLabel = airQualityDetails?.aqiLabel || "Unknown";
   const infoTitle = showParticlesSketch
@@ -223,22 +273,6 @@ export const OptimizedDebugParticlesOnly = () => {
     : "Air Quality Info";
   const isZoomingIn = isTransitioning && transitionDirection === "in";
   const isZoomingOut = isTransitioning && transitionDirection === "out";
-  const zoomButtonStyles = {
-    position: "fixed",
-    bottom: "2rem",
-    right: "2rem",
-    width: "56px",
-    height: "56px",
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    backdropFilter: "blur(10px)",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-    zIndex: 1001,
-    transition: "transform 0.2s ease, background-color 0.2s ease",
-    "&:hover": {
-      backgroundColor: "rgba(255, 255, 255, 1)",
-      transform: "scale(1.1)",
-    },
-  } as const;
 
   return (
     <div
@@ -423,8 +457,62 @@ export const OptimizedDebugParticlesOnly = () => {
           {/* Particles Mode */}
           {showParticlesSketch ? (
             <>
-              {/* Particle Counts */}
-              {particleCounts && (
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "0.5rem",
+                  marginBottom: "1rem",
+                  backgroundColor: "#e0e0e0",
+                  borderRadius: "8px",
+                  padding: "0.3rem",
+                }}
+              >
+                <Button
+                  onClick={() => setParticleViewMode("list")}
+                  variant={particleViewMode === "list" ? "contained" : "text"}
+                  size="small"
+                  sx={{
+                    boxShadow: "none",
+                    backgroundColor:
+                      particleViewMode === "list" ? "#FFD400" : "transparent",
+                    color: particleViewMode === "list" ? "#000" : "#555",
+                    "&:hover": {
+                      backgroundColor:
+                        particleViewMode === "list" ? "#FFE254" : "transparent",
+                      boxShadow: "none",
+                    },
+                    textTransform: "none",
+                    fontWeight: 700,
+                  }}
+                  aria-pressed={particleViewMode === "list"}
+                >
+                  List View
+                </Button>
+                <Button
+                  onClick={() => setParticleViewMode("pie")}
+                  variant={particleViewMode === "pie" ? "contained" : "text"}
+                  size="small"
+                  sx={{
+                    boxShadow: "none",
+                    backgroundColor:
+                      particleViewMode === "pie" ? "#FFD400" : "transparent",
+                    color: particleViewMode === "pie" ? "#000" : "#555",
+                    "&:hover": {
+                      backgroundColor:
+                        particleViewMode === "pie" ? "#FFE254" : "transparent",
+                      boxShadow: "none",
+                    },
+                    textTransform: "none",
+                    fontWeight: 700,
+                  }}
+                  aria-pressed={particleViewMode === "pie"}
+                >
+                  Pie Chart View
+                </Button>
+              </Box>
+
+              {particleCounts && particleViewMode === "list" && (
                 <Box sx={{ marginBottom: "1rem" }}>
                   <Typography
                     variant="body2"
@@ -557,6 +645,31 @@ export const OptimizedDebugParticlesOnly = () => {
                   })}
                 </Box>
               )}
+
+              {particleViewMode === "pie" && (
+                <>
+                  {particleCounts ? (
+                    <ParticleDistributionPie particleCounts={particleCounts} />
+                  ) : (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "#666",
+                        padding: "1rem",
+                        textAlign: "center",
+                      }}
+                    >
+                      No particle data available for chart.
+                    </Typography>
+                  )}
+                </>
+              )}
+
+              {!particleCounts && particleViewMode === "list" && (
+                <Typography variant="body2" sx={{ color: "#666" }}>
+                  Particle data unavailable.
+                </Typography>
+              )}
             </>
           ) : (
             <>
@@ -643,27 +756,6 @@ export const OptimizedDebugParticlesOnly = () => {
         </Collapse>
       </Paper>
 
-      {/* Zoom Controls - Bottom Right */}
-      {!showParticlesSketch ? (
-        <IconButton
-          onClick={handleZoomClick}
-          disabled={isTransitioning}
-          sx={zoomButtonStyles}
-          aria-label="Zoom to particles view"
-        >
-          <ZoomInIcon sx={{ color: "#1976d2", fontSize: "28px" }} />
-        </IconButton>
-      ) : (
-        <IconButton
-          onClick={handleZoomOutClick}
-          disabled={isTransitioning}
-          sx={zoomButtonStyles}
-          aria-label="Zoom out to visibility view"
-        >
-          <ZoomOutIcon sx={{ color: "#1976d2", fontSize: "28px" }} />
-        </IconButton>
-      )}
-
       {/* CSS Animations for zoom blur and fade effects */}
       <style>
         {`
@@ -708,5 +800,90 @@ export const OptimizedDebugParticlesOnly = () => {
         `}
       </style>
     </div>
+  );
+};
+
+type ParticleDistributionPieProps = {
+  particleCounts: Record<string, number>;
+};
+
+/**
+ * Minimal pie chart showing particle distribution with no extra chrome
+ */
+const ParticleDistributionPie = ({
+  particleCounts,
+}: ParticleDistributionPieProps) => {
+  const data = (
+    Object.keys(POLLUTANT_INFO) as Array<keyof typeof POLLUTANT_INFO>
+  ).map((key) => {
+    const rawValue = Number(particleCounts[key]);
+    const value = Number.isFinite(rawValue) && rawValue > 0 ? rawValue : 0;
+    return {
+      key,
+      label: POLLUTANT_INFO[key].label,
+      value,
+      color: POLLUTANT_COLORS[key],
+    };
+  });
+
+  const hasData = data.some((item) => item.value > 0);
+  const totalCount = data.reduce((sum, item) => sum + item.value, 0);
+
+  if (!hasData) {
+    return (
+      <Typography
+        variant="body2"
+        sx={{ color: "#666", textAlign: "center", marginTop: "0.5rem" }}
+      >
+        No particle data available to display in chart.
+      </Typography>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        marginTop: "0.5rem",
+        marginBottom: "0.5rem",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "0.75rem",
+      }}
+    >
+      <Typography
+        variant="body2"
+        sx={{
+          color: "#666",
+          fontWeight: 500,
+          textAlign: "center",
+        }}
+      >
+        Particle Distribution ({totalCount} total)
+      </Typography>
+      <PieChart width={100} height={100}>
+        <Pie
+          data={data}
+          dataKey="value"
+          nameKey="label"
+          cx={130}
+          cy={110}
+          outerRadius={90}
+          innerRadius={0}
+          labelLine={false}
+          label={({ value }) => (value > 0 ? `${value}` : "")}
+          isAnimationActive={false}
+        >
+          {data.map((entry) => (
+            <Cell
+              key={entry.key}
+              fill={entry.color}
+              stroke="#ffffff"
+              strokeWidth={1}
+            />
+          ))}
+        </Pie>
+      </PieChart>
+    </Box>
   );
 };
