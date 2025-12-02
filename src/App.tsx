@@ -3,11 +3,12 @@ import { CssBaseline } from "@mui/material";
 import CityProvider from "./providers/city-provider";
 import LandingPage from "./features/landing/landing-page";
 import MistPage from "./features/processing/mist";
+import AqiPage from "./features/processing/aqi";
 import ExaminePage from "./features/processing/examine";
 import MorePage from "./features/processing/more";
 //import { DebugParticlesOnly } from "./features/processing/particlesDebug";
 import { OptimizedDebugParticlesOnly } from "./features/processing/optimized-particles-debug";
-import ParticleView from "./features/processing/particleView";
+import ParticleView from "./features/processing/oldsketches/particleView";
 import ConclusionPage from "./features/processing/conclusion";
 /**
  * Application routing and providers.
@@ -19,6 +20,7 @@ const App = () => (
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/mist" element={<MistPage />} />
+        <Route path="/aqi" element={<AqiPage />} />
         <Route path="/examine" element={<ExaminePage />} />
         <Route path="/more" element={<MorePage />} />
         <Route

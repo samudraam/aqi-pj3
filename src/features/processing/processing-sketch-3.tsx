@@ -213,7 +213,7 @@ const ProcessingSketch2 = () => {
             const falloff = 1 - dist / SWIPE_RADIUS;
             const speed = Math.min(
               Math.sqrt(trail.dx * trail.dx + trail.dy * trail.dy) /
-                SWIPE_SPEED_SCALE,
+              SWIPE_SPEED_SCALE,
               1
             );
             const magnitude = SWIPE_STRENGTH * speed * falloff * falloff;

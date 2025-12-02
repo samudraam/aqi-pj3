@@ -64,9 +64,11 @@ interface AqiSliderProps {
  * with arrows underneath each segment and an indicator for the current AQI value
  */
 export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
+  const maxWidth = typeof width === "number" ? `${width}px` : width;
   const currentAqi = aqi ?? null;
   const currentLevel =
     currentAqi && currentAqi >= 1 && currentAqi <= 5 ? currentAqi : null;
+  const segmentPercent = 100 / AQI_SEGMENTS.length;
 
   /**
    * Calculates the position percentage for the current AQI indicator
@@ -74,14 +76,15 @@ export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
    */
   const getIndicatorPosition = (): number => {
     if (!currentLevel) return 0;
-    // Each segment is 20% wide, position at the center of the segment
-    return (currentLevel - 1) * 20 + 10;
+    return (currentLevel - 1) * segmentPercent + segmentPercent / 2;
   };
 
   return (
     <Box
       sx={{
-        width,
+        width: "100%",
+        maxWidth,
+        minWidth: 0,
         display: "flex",
         flexDirection: "column",
         gap: "0.5rem",
@@ -92,7 +95,7 @@ export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
         sx={{
           position: "relative",
           width: "100%",
-          height: "32px",
+          height: { xs: "24px", sm: "28px", md: "32px" },
           borderRadius: "4px",
           overflow: "hidden",
           border: "1px solid rgba(0, 0, 0, 0.1)",
@@ -104,8 +107,8 @@ export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
             key={segment.level}
             sx={{
               position: "absolute",
-              left: `${index * 20}%`,
-              width: "20%",
+              left: `${index * segmentPercent}%`,
+              width: `${segmentPercent}%`,
               height: "100%",
               background: `linear-gradient(to right, ${segment.colors.start}, ${segment.colors.end})`,
               borderRight:
@@ -129,9 +132,9 @@ export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
               sx={{
                 width: 0,
                 height: 0,
-                borderLeft: "6px solid transparent",
-                borderRight: "6px solid transparent",
-                borderTop: "8px solid #000000",
+                borderLeft: { xs: "5px solid transparent", md: "6px solid transparent" },
+                borderRight: { xs: "5px solid transparent", md: "6px solid transparent" },
+                borderTop: { xs: "7px solid #000000", md: "8px solid #000000" },
               }}
             />
           </Box>
@@ -166,11 +169,16 @@ export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
                 sx={{
                   width: 0,
                   height: 0,
-                  borderLeft: "4px solid transparent",
-                  borderRight: "4px solid transparent",
-                  borderBottom: `6px solid ${
-                    isActive ? "#000000" : "rgba(0, 0, 0, 0.3)"
-                  }`,
+                  borderLeft: { xs: "3px solid transparent", md: "4px solid transparent" },
+                  borderRight: { xs: "3px solid transparent", md: "4px solid transparent" },
+                  borderBottom: {
+                    xs: `5px solid ${
+                      isActive ? "#000000" : "rgba(0, 0, 0, 0.3)"
+                    }`,
+                    md: `6px solid ${
+                      isActive ? "#000000" : "rgba(0, 0, 0, 0.3)"
+                    }`,
+                  },
                   transition: "border-bottom-color 0.2s ease",
                 }}
               />
@@ -179,7 +187,7 @@ export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
                 variant="caption"
                 sx={{
                   fontSize: "0.7rem",
-                  fontWeight: isActive ? 600 : 400,
+                  fontWeight: isActive ? 800 : 400,
                   color: isActive ? "#000000" : "rgba(0, 0, 0, 0.6)",
                   textAlign: "center",
                   transition: "all 0.2s ease",

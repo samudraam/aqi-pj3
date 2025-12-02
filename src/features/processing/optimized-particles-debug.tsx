@@ -2,7 +2,6 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import type { FormEvent } from "react";
 import {
   Box,
-  TextField,
   Typography,
   Paper,
   Collapse,
@@ -23,6 +22,7 @@ import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import Timeline from "../../components/timeline";
 import { useNavigate } from "react-router-dom";
 import { AqiSlider } from "../../components/aqi-slider";
+import CityAutocomplete from "../../components/city-autocomplete";
 
 // Particle type labels, descriptions, and images
 const POLLUTANT_INFO = {
@@ -89,13 +89,6 @@ export const OptimizedDebugParticlesOnly = () => {
       setInputValue(airQualityDetails.cityName);
     }
   }, [airQualityDetails]);
-
-  /**
-   * Handles city input change
-   */
-  const handleCityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
-  };
 
   /**
    * Handles city form submission
@@ -567,23 +560,27 @@ export const OptimizedDebugParticlesOnly = () => {
             </>
           ) : (
             <>
-              {/* Processing Mode - Original Content */}
-              {/* City Input */}
+              {/* Processing Mode - City Autocomplete Input */}
               <form onSubmit={handleCitySubmit}>
-                <TextField
-                  fullWidth
-                  label="City"
+                <CityAutocomplete
                   value={inputValue}
-                  onChange={handleCityChange}
+                  onChange={(nextValue) => setInputValue(nextValue)}
+                  placeholder="Enter city name"
                   disabled={isFetching}
-                  size="small"
+                  minLength={3}
                   sx={{
+                    width: "100%",
                     marginBottom: "1rem",
                     "& .MuiOutlinedInput-root": {
                       backgroundColor: "white",
                     },
                   }}
-                  placeholder="Enter city name"
+                  textFieldProps={{
+                    size: "small",
+                    label: "City",
+                    variant: "outlined",
+                    inputProps: { "aria-label": "City search input" },
+                  }}
                 />
               </form>
 

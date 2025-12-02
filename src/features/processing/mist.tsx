@@ -156,7 +156,7 @@ const MistPage = () => {
         onClick={handleNavigatePrevious}
         sx={{
           position: "absolute",
-          bottom: 24,
+          top: 24,
           left: 24,
           width: 72,
           height: 72,
@@ -177,7 +177,7 @@ const MistPage = () => {
           onClick={handleNavigateNext}
           sx={{
             position: "absolute",
-            bottom: 24,
+            top: 24,
             right: 24,
             width: 72,
             height: 72,

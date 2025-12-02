@@ -1,15 +1,11 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
-import {
-  Alert,
-  Box,
-  CircularProgress,
-  IconButton,
-  InputBase,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CityAutocomplete, {
+  type CitySuggestion,
+} from "../../components/city-autocomplete";
 import { useCity } from "../../providers/use-city";
 import grass from "../../assets/grass2.png";
 import AboutModal from "../../components/about-modal";
@@ -26,11 +22,18 @@ const LandingPage = () => {
   const isHeadingInView = useInView(headingRef, { once: true });
   const isSubmitVisible = cityQuery.trim().length > 0;
 
-  const handleCityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCityQuery(event.target.value);
+  const handleCityChange = (nextValue: string) => {
+    setCityQuery(nextValue);
     if (errorMessage) {
       setErrorMessage(null);
     }
+  };
+
+  const handleCitySelect = (city: CitySuggestion) => {
+    const formatted = [city.name, city.state, city.country]
+      .filter(Boolean)
+      .join(", ");
+    setCityQuery(formatted);
   };
 
   const handleAboutOpen = () => setIsAboutOpen(true);
@@ -211,23 +214,33 @@ const LandingPage = () => {
             gap: { xs: 1, sm: 1.5 },
           }}
         >
-          <InputBase
+          <CityAutocomplete
             value={cityQuery}
             onChange={handleCityChange}
+            onSelect={handleCitySelect}
             placeholder="Enter your city to begin"
-            autoFocus
-            fullWidth
-            inputProps={{
-              "aria-label": "City search input",
-            }}
+            minLength={3}
             sx={{
-              fontSize: { xs: "1rem", sm: "1.25rem", md: "1.25rem" },
-              fontWeight: 500,
-              color: "#1C1C1E",
-              "& input::placeholder": {
-                color: "#8E8E93",
-                opacity: 1,
+              flex: 1,
+              "& .MuiOutlinedInput-root": {
+                px: { xs: 0.5, sm: 1 },
+                py: { xs: 0.25, sm: 0.5 },
+                fontSize: { xs: "1rem", sm: "1.25rem", md: "1.25rem" },
+                fontWeight: 500,
+                color: "#1C1C1E",
+                "& fieldset": { border: "none" },
               },
+              "& .MuiInputBase-input": {
+                "&::placeholder": {
+                  color: "#8E8E93",
+                  opacity: 1,
+                },
+              },
+            }}
+            textFieldProps={{
+              autoFocus: true,
+              variant: "outlined",
+              inputProps: { "aria-label": "City search input" },
             }}
           />
           <IconButton

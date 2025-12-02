@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import p5 from "p5";
-import { useCity } from "../../providers/use-city";
+import { useCity } from "../../../providers/use-city";
 
 interface Particle {
   x: number;
@@ -14,7 +14,7 @@ interface Particle {
 /**
  * WebGL frosted glass camera effect with AQI-driven particles.
  */
-const ProcessingSketch = () => {
+const ProcessingSketch2 = () => {
   const sketchRef = useRef<HTMLDivElement | null>(null);
   const { airQualityDetails } = useCity();
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -107,12 +107,13 @@ const ProcessingSketch = () => {
 
       const sketch = (s: p5) => {
         const DOWNSAMPLE = 2;
-        const BLUR_RADIUS = 5;
-        const REFRACT_AMT = 0.1;
-        const GRAIN_AMT = 0.01;
-        const DESAT_AMT = 0.1;
-        const BRUSH_SIZE = 80;
-        const BRUSH_STRENGTH = 0.3;
+        const BLUR_RADIUS = 8;
+        const REFRACT_AMT = 0.5;
+        const GRAIN_AMT = 0;
+        const DESAT_AMT = 0.2;
+        // comment out brush size and strength
+        // const BRUSH_SIZE = 80;
+        // const BRUSH_STRENGTH = 0.3;
 
         let cam: p5.MediaElement | null = null;
         let camReady = false;
@@ -219,13 +220,14 @@ const ProcessingSketch = () => {
           maskG.background(255);
         };
 
-        const paintReveal = (x: number, y: number) => {
-          maskG.push();
-          maskG.noStroke();
-          maskG.fill(0, 0, 0, BRUSH_STRENGTH * 255);
-          maskG.circle(x, y, BRUSH_SIZE);
-          maskG.pop();
-        };
+        // comment out paining 
+        // const paintReveal = (x: number, y: number) => {
+        //   maskG.push();
+        //   maskG.noStroke();
+        //   maskG.fill(0, 0, 0, BRUSH_STRENGTH * 255);
+        //   maskG.circle(x, y, BRUSH_SIZE);
+        //   maskG.pop();
+        // };
 
         const compileShaders = () => {
           const vertSrc = `
@@ -268,9 +270,9 @@ const ProcessingSketch = () => {
             vec2 texelSize = 1.0 / resolution;
             vec4 result = vec4(0.0);
             float totalWeight = 0.0;
-            float sigma = 2.5;
+            float sigma = 3.0; //increase blur radius
             
-            for(int i = -4; i <= 4; i++) {
+            for(int i = -6; i <= 6; i++) { //increase blur radius
               float weight = gaussianWeight(float(i), sigma);
               vec2 offset = vec2(float(i) * radius * texelSize.x, 0.0);
               result += texture2D(tex, uv + offset) * weight;
@@ -297,9 +299,9 @@ const ProcessingSketch = () => {
             vec2 texelSize = 1.0 / resolution;
             vec4 result = vec4(0.0);
             float totalWeight = 0.0;
-            float sigma = 2.5;
+            float sigma = 3.0; //increase blur radius
             
-            for(int i = -4; i <= 4; i++) {
+            for(int i = -6; i <= 6; i++) { //increase blur radius
               float weight = gaussianWeight(float(i), sigma);
               vec2 offset = vec2(0.0, float(i) * radius * texelSize.y);
               result += texture2D(tex, uv + offset) * weight;
@@ -525,17 +527,18 @@ const ProcessingSketch = () => {
           s.pop();
         };
 
-        s.mouseDragged = () => {
-          paintReveal(s.mouseX, s.mouseY);
-          return false;
-        };
+        // remove drag to reveal feature
+        // s.mouseDragged = () => {
+        //   paintReveal(s.mouseX, s.mouseY);
+        //   return false;
+        // };
 
-        s.touchMoved = () => {
-          for (const touch of s.touches as Array<{ x: number; y: number }>) {
-            paintReveal(touch.x, touch.y);
-          }
-          return false;
-        };
+        // s.touchMoved = () => {
+        //   for (const touch of s.touches as Array<{ x: number; y: number }>) {
+        //     paintReveal(touch.x, touch.y);
+        //   }
+        //   return false;
+        // };
 
         s.keyPressed = () => {
           if (s.key === "r" || s.key === "R") {
@@ -599,4 +602,4 @@ const ProcessingSketch = () => {
   );
 };
 
-export default ProcessingSketch;
+export default ProcessingSketch2;

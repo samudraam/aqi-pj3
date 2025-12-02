@@ -3,7 +3,6 @@ import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
-  TextField,
   Typography,
   Paper,
   Collapse,
@@ -20,11 +19,14 @@ import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ProcessingSketch2 from "./processing-sketch-3";
-import ParticlesSketch3 from "./particles-sketch-3";
-import { useCity } from "../../providers/use-city";
-import Timeline from "../../components/timeline";
-import { AqiSlider } from "../../components/aqi-slider";
+import ProcessingSketch2 from "../processing-sketch-3";
+import ParticlesSketch3 from "../processing-sketch-3";
+import { useCity } from "../../../providers/use-city";
+import Timeline from "../../../components/timeline";
+import { AqiSlider } from "../../../components/aqi-slider";
+import CityAutocomplete, {
+  type CitySuggestion,
+} from "../../../components/city-autocomplete";
 // Particle type labels, descriptions, and images
 const POLLUTANT_INFO = {
   o3: {
@@ -92,8 +94,15 @@ export const DebugParticlesOnly = () => {
   /**
    * Handles city input change
    */
-  const handleCityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
+  const handleCityChange = (value: string) => {
+    setInputValue(value);
+  };
+
+  const handleCitySelect = (city: CitySuggestion) => {
+    const formatted = [city.name, city.state, city.country]
+      .filter(Boolean)
+      .join(", ");
+    setInputValue(formatted);
   };
 
   /**
@@ -291,9 +300,8 @@ export const DebugParticlesOnly = () => {
             height: "100vh",
             zIndex: 2000,
             pointerEvents: "none",
-            animation: `${
-              transitionDirection === "out" ? "zoomOutBlur" : "zoomInBlur"
-            } 0.6s ease-out forwards`,
+            animation: `${transitionDirection === "out" ? "zoomOutBlur" : "zoomInBlur"
+              } 0.6s ease-out forwards`,
           }}
         />
       )}
@@ -330,7 +338,7 @@ export const DebugParticlesOnly = () => {
               "transform 0.6s ease-out, filter 0.6s ease-out, opacity 0.6s ease-out",
           }}
         >
-          <ParticlesSketch3 showControls={false} />
+          <ParticlesSketch3 />
         </div>
       )}
 
@@ -531,20 +539,24 @@ export const DebugParticlesOnly = () => {
               {/* Processing Mode - Original Content */}
               {/* City Input */}
               <form onSubmit={handleCitySubmit}>
-                <TextField
-                  fullWidth
-                  label="City"
+                <CityAutocomplete
                   value={inputValue}
                   onChange={handleCityChange}
+                  onSelect={handleCitySelect}
                   disabled={isFetching}
-                  size="small"
+                  minLength={3}
+                  placeholder="Enter city name"
+                  textFieldProps={{
+                    label: "City",
+                    size: "small",
+                    fullWidth: true,
+                  }}
                   sx={{
                     marginBottom: "1rem",
                     "& .MuiOutlinedInput-root": {
                       backgroundColor: "white",
                     },
                   }}
-                  placeholder="Enter city name"
                 />
               </form>
 

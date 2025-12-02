@@ -183,7 +183,7 @@ const ExaminePage = () => {
   };
 
   const handleNavigateNext = useCallback(() => {
-    navigate("/particles-debug");
+    navigate("/aqi");
   }, [navigate]);
 
   const handleNavigatePrevious = useCallback(() => {
@@ -199,14 +199,10 @@ const ExaminePage = () => {
         minWidth: "100vw",
         position: "relative",
         overflow: "hidden",
-        backgroundImage: "linear-gradient(180deg, #6CB2CE 0%, #FFFFFF 72%)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        cursor: "none",
+        cursor: "crosshair",
       }}
       onPointerMove={(event) => {
-        setCursorPosition({ x: event.clientX, y: event.clientY });
+        setCursorPosition({ x: event.clientX+30, y: event.clientY+40 });
         setCursorVisible(true);
       }}
       onPointerLeave={() => {
@@ -214,6 +210,7 @@ const ExaminePage = () => {
       }}
     >
       <Timeline currentStep="discover" />
+      <Typography variant="body1" sx={{ textAlign: "center", fontWeight: 700, fontSize: { xs: '1rem', md: '1.5rem' }  }}>Hover each particle to learn more.</Typography>
       {particleInstances.map((particle) => {
         const isActive = hoveredId === particle.id;
         return (
@@ -324,7 +321,7 @@ const ExaminePage = () => {
         onClick={handleNavigatePrevious}
         sx={{
           position: "absolute",
-          bottom: 24,
+          top: 24,
           left: 24,
           width: 72,
           height: 72,
@@ -341,7 +338,7 @@ const ExaminePage = () => {
         onClick={handleNavigateNext}
         sx={{
           position: "absolute",
-          bottom: 24,
+          top: 24,
           right: 24,
           width: 72,
           height: 72,
