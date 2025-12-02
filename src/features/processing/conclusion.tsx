@@ -64,7 +64,7 @@ const ConclusionPage = () => {
         position: "relative",
       }}
     >
-      <Timeline currentStep="End" />
+      <Timeline currentStep="end" />
 
       <Box
         sx={{
@@ -227,7 +227,7 @@ const ConclusionPage = () => {
         onClick={handleNavigatePrevious}
         sx={{
           position: "absolute",
-          bottom: 24,
+          top: 24,
           left: 24,
           width: 72,
           height: 72,
