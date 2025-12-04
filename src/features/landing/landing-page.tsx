@@ -102,7 +102,7 @@ const LandingPage = () => {
               px: 50,
               fontFamily: "Inter",
               fontWeight: 600,
-              fontSize: { xs: "2rem", sm: "2.5rem", md: "2.5rem" },
+              fontSize: { xs: "2rem", sm: "2.5rem", md: "2.2rem" },
               lineHeight: 0.9,
               color: "#000000",
             }}
@@ -121,7 +121,8 @@ const LandingPage = () => {
             sx={{
               mt: 2,
               fontSize: { xs: "0.75rem", sm: "0.875rem", md: "1rem" },
-              fontFamily: "Inter",
+              fontFamily: "Raleway",
+              fontWeight: 500,
               color: "#000000",
               opacity: 0.8,
               maxWidth: "90%",
@@ -185,7 +186,7 @@ const LandingPage = () => {
           sx={{
             fontFamily: "Antipol-Bold",
             mt: 10,
-            fontSize: { xs: "2.25rem", sm: "3rem", md: "4rem" },
+            fontSize: { xs: "2.25rem", sm: "3rem", md: "4.5rem" },
             letterSpacing: { xs: 0.5, sm: 1 },
           }}
         >
@@ -225,6 +226,7 @@ const LandingPage = () => {
               "& .MuiOutlinedInput-root": {
                 px: { xs: 0.5, sm: 1 },
                 py: { xs: 0.25, sm: 0.5 },
+                fontFamily: "Raleway",
                 fontSize: { xs: "1rem", sm: "1.25rem", md: "1.25rem" },
                 fontWeight: 500,
                 color: "#1C1C1E",
@@ -306,7 +308,7 @@ const LandingPage = () => {
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           backgroundPosition: "center bottom",
-          zIndex: 5,
+          zIndex: 10,
         }}
       />
 

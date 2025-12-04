@@ -9,7 +9,7 @@ interface TimelineStep {
   cy: number;
 }
 
-const RADIUS = 18.5474;
+const RADIUS = 6;
 
 const timelineSteps: TimelineStep[] = [
   { id: "discover", label: "Discover", path: "/mist", cx: 21.0474, cy: 20.0474 },
@@ -34,13 +34,11 @@ const Timeline = ({ currentStep }: TimelineProps) => {
       component="nav"
       aria-label="Experience timeline"
       sx={{
-        position: "sticky",
         top: 0,
         left: 0,
         width: "100%",
         zIndex: 1000,
-        py: 1.5,
-        px: { xs: 2, sm: 4 },
+        py: 1,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -48,7 +46,7 @@ const Timeline = ({ currentStep }: TimelineProps) => {
     >
       <Box
         sx={{
-          width: "50%",
+          width: "100%",
           display: "flex",
           justifyContent: "center",
         }}
@@ -66,7 +64,7 @@ const Timeline = ({ currentStep }: TimelineProps) => {
           {timelineSteps.map((step, index) => {
             if (index === timelineSteps.length - 1) return null;
             const next = timelineSteps[index + 1];
-            const isCompletedSegment = index < currentIndex;
+            //const isCompletedSegment = index < currentIndex;
 
             return (
               <line
@@ -75,8 +73,8 @@ const Timeline = ({ currentStep }: TimelineProps) => {
                 y1={step.cy}
                 x2={next.cx - RADIUS}
                 y2={next.cy}
-                stroke={isCompletedSegment ? "black" : "black"}
-                strokeWidth="3"
+                stroke={"#d9d9d9"}
+                strokeWidth="7"
               />
             );
           })}
@@ -92,11 +90,11 @@ const Timeline = ({ currentStep }: TimelineProps) => {
                   cx={step.cx}
                   cy={step.cy}
                   r={RADIUS}
-                  stroke="black"
-                  strokeWidth="3"
+                  strokeWidth="7"
                   initial={false}
                   animate={{
-                    fill: isCompleted ? "#000000" : "none", 
+                    stroke: isCompleted ? "#000000" : "#7D7D7D",
+                    fill: isCompleted ? "#000000" : "#7D7D7D", 
                     scale: isCurrent ? 1.02 : 1,
                   }}
                   transition={{ duration: 0.3, type: "tween" }}
@@ -107,7 +105,7 @@ const Timeline = ({ currentStep }: TimelineProps) => {
                   textAnchor="middle"
                   fontFamily= "Inter"
                   fontWeight={500}
-                  fontSize="11.5"
+                  fontSize="15"
                   fill="#000000"
                 >
                   {step.label}
