@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import p5 from "p5";
 import { useCity } from "../../providers/use-city";
+import "./processing-sketch-4.css";
 
 interface Particle {
   x: number;
@@ -26,6 +27,10 @@ const SWIPE_STRENGTH = 6;
 const SWIPE_DECAY_MS = 240;
 const SWIPE_SPEED_SCALE = 22;
 const SWIPE_MIN_DELTA = 1.5;
+const MIN_LOADER_DURATION_MS = 1800;
+
+const getNow = () =>
+  typeof performance !== "undefined" ? performance.now() : Date.now();
 
 /**
  * WebGL frosted glass camera effect with AQI-driven particles.
@@ -40,6 +45,54 @@ const ProcessingSketch2 = () => {
   const cameraElementRef = useRef<HTMLVideoElement | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const metadataCleanupRef = useRef<(() => void) | null>(null);
+  const loaderDelayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const loaderStartTimestampRef = useRef<number>(0);
+
+  /**
+   * Clears any queued loader timeout to avoid race conditions.
+   */
+  const clearLoaderDelay = useCallback(() => {
+    if (loaderDelayTimeoutRef.current) {
+      clearTimeout(loaderDelayTimeoutRef.current);
+      loaderDelayTimeoutRef.current = null;
+    }
+  }, []);
+
+  /**
+   * Starts (or restarts) the loader timer and immediately shows the overlay.
+   */
+  const startLoader = useCallback(() => {
+    clearLoaderDelay();
+    loaderStartTimestampRef.current = getNow();
+    setIsLoading(true);
+  }, [clearLoaderDelay]);
+
+  /**
+   * Ensures the loader stays visible for the minimum duration before hiding.
+   */
+  const finishLoaderWithMinimum = useCallback(() => {
+    clearLoaderDelay();
+    const startedAt = loaderStartTimestampRef.current;
+    if (!startedAt) {
+      loaderStartTimestampRef.current = 0;
+      setIsLoading(false);
+      return;
+    }
+    const elapsed = getNow() - startedAt;
+    const remaining = Math.max(MIN_LOADER_DURATION_MS - elapsed, 0);
+    if (remaining === 0) {
+      loaderStartTimestampRef.current = 0;
+      setIsLoading(false);
+      return;
+    }
+    loaderDelayTimeoutRef.current = setTimeout(() => {
+      loaderDelayTimeoutRef.current = null;
+      loaderStartTimestampRef.current = 0;
+      setIsLoading(false);
+    }, remaining);
+  }, [clearLoaderDelay]);
 
   const sketchConfig = useMemo<SketchConfig>(() => {
     const defaultConfig: SketchConfig = {
@@ -119,20 +172,19 @@ const ProcessingSketch2 = () => {
         cameraElementRef.current.srcObject = null;
         cameraElementRef.current = null;
       }
+      clearLoaderDelay();
     };
 
     releaseResources();
     setCameraError(null);
+    startLoader();
 
     if (!sketchRef.current || !airQualityDetails) {
-      setIsLoading(true);
       return () => {
         isEffectCancelled = true;
         releaseResources();
       };
     }
-
-    setIsLoading(true);
 
     // Small delay to ensure DOM is fully ready after route transition
     const initTimeout = setTimeout(() => {
@@ -300,7 +352,7 @@ const ProcessingSketch2 = () => {
               }
               syncCameraDimensions();
               camReady = true;
-              setIsLoading(false);
+              finishLoaderWithMinimum();
               const stream = videoElement.srcObject;
               if (stream instanceof MediaStream) {
                 mediaStreamRef.current = stream;
@@ -325,7 +377,7 @@ const ProcessingSketch2 = () => {
             console.error("Camera setup error:", error);
             if (!isEffectCancelled) {
               setCameraError("Failed to start camera.");
-              setIsLoading(false);
+              finishLoaderWithMinimum();
             }
           }
         };
@@ -640,17 +692,17 @@ const ProcessingSketch2 = () => {
             !compositeShader ||
             !particleShader
           ) {
-            s.background(50, 0, 0);
+            s.background(255);
             return;
           }
 
           if (!camReady || !cam || cam.width <= 0 || cam.height <= 0) {
-            s.background(20);
+            s.background(250);
             return;
           }
 
           if (!pgLowA || !pgLowB || !pgTemp || !maskG) {
-            s.background(20);
+            s.background(250);
             return;
           }
 
@@ -803,43 +855,46 @@ const ProcessingSketch2 = () => {
       clearTimeout(initTimeout);
       releaseResources();
     };
-  }, [airQualityDetails, sketchConfig]);
+  }, [
+    airQualityDetails,
+    clearLoaderDelay,
+    finishLoaderWithMinimum,
+    sketchConfig,
+    startLoader,
+  ]);
 
   return (
     <>
       <div
         ref={sketchRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          backgroundColor: "white",
-          margin: 0,
-          padding: 0,
-          zIndex: 1,
-        }}
+        className="sketch-root fixed inset-0 z-[1] m-0 h-screen w-screen bg-white p-0"
       />
       {(isLoading || cameraError) && (
         <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            color: cameraError ? "#ff6b6b" : "#ffffff",
-            fontSize: "1.2rem",
-            textAlign: "center",
-            zIndex: 1000,
-            padding: "2rem",
-            backgroundColor: "rgba(0, 0, 0, 0.7)",
-            borderRadius: "8px",
-            pointerEvents: "none",
-          }}
+          className="loading-overlay pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-white px-6 text-gray-900"
+          aria-live="polite"
+          aria-busy={isLoading}
+          tabIndex={0}
         >
-          {cameraError ||
-            "Waiting for camera... \n (type a city name if no feed appears)"}
+          {cameraError ? (
+            <p className="text-base font-raleway font-semibold leading-relaxed text-red-600">
+              {cameraError}
+            </p>
+          ) : (
+            <div className="flex flex-col items-center gap-4 text-center">
+              <h1 className="text-xl font-semibold tracking-wide font-raleway">Loading...</h1>
+              <div
+                className="loader"
+                role="status"
+                aria-label="Processing air quality"
+              />
+              <div className="loading-overlay__text text-sm font-medium text-gray-600 space-y-1">
+                <p>Analyzing your air quality...</p>
+                <p>Visualizing it through your camera view.</p>
+                <p>(The worse the air, the blurrier the image.)</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>

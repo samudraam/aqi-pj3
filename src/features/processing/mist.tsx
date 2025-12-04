@@ -61,7 +61,7 @@ const MistPage = () => {
           left: 0,
           width: "100%",
           height: "100%",
-          zIndex: 10,
+          zIndex: 200,
         }}
       >
         <AnimatePresence mode="wait">
@@ -71,7 +71,7 @@ const MistPage = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 1, delay: 1 }}
+              transition={{ duration: 1, delay: 2 }}
             >
               <Typography
                 sx={{
@@ -85,9 +85,7 @@ const MistPage = () => {
                   zIndex: 10,
                 }}
               >
-                There seems to be
-                <br />
-                something in the air...
+                See particles in the air?
               </Typography>
               <Typography
                 sx={{
@@ -95,13 +93,13 @@ const MistPage = () => {
                   textAlign: "center",
                   fontFamily: "Inter",
                   color: "#000000",
-                  fontSize: { xs: "1rem", sm: "1rem", md: "1.5rem" },
-                  fontWeight: 400,
+                  fontSize: { xs: "1.25rem", sm: "1.25rem", md: "1.25rem" },
+                  fontWeight: 500,
                   lineHeight: 1.5,
                   zIndex: 10,
                 }}
               >
-                Can you disperse these particles?
+                Move your cursor to disperse them.
               </Typography>
             </motion.div>
           ) : (
@@ -132,15 +130,13 @@ const MistPage = () => {
                   textAlign: "center",
                   fontFamily: "Raleway",
                   color: "#000000",
-                  fontSize: { xs: "1rem", sm: "1rem", md: "1.5rem" },
-                  fontWeight: 400,
+                  fontSize: { xs: "1.25rem", sm: "1.25rem", md: "1.25rem" },
+                  fontWeight: 500,
                   lineHeight: 1.5,
                   zIndex: 10,
                 }}
               >
-                What’s in this mist anyways? 
-                <br />
-                Click the arrow to find out!
+                What’s in this mist anyways? Click the arrow to find out!
               </Typography>
             </motion.div>
           )}
