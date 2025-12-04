@@ -17,7 +17,6 @@ import ParticlesSketch3 from "./particles-sketch-3";
 import { useCity } from "../../providers/use-city";
 import CityAutocomplete from "../../components/city-autocomplete";
 import ProcessingHeader from "../../components/processing-header";
-import { PieChart, Pie, Cell } from "recharts";
 
 // Particle type labels, descriptions, and images
 const POLLUTANT_INFO = {
@@ -54,11 +53,11 @@ const POLLUTANT_INFO = {
 } as const;
 
 const POLLUTANT_COLORS: Record<keyof typeof POLLUTANT_INFO, string> = {
-  o3: "#2D7ED8",
-  pm2_5: "#4FC3F7",
-  pm10: "#FFCA28",
-  co: "#27AE60",
-  no2: "#6C4A2D",
+  o3: "#54E0F7",
+  pm2_5: "#E54C4C",
+  pm10: "#FFF427",
+  co: "#B7ED32",
+  no2: "#8E5B00",
 };
 
 /**
@@ -521,16 +520,18 @@ type ParticleDistributionPieProps = {
 };
 
 /**
- * Minimal pie chart showing particle distribution with no extra chrome
+ * Minimal custom SVG pie chart to avoid Recharts NaN errors.
  */
 const ParticleDistributionPie = ({
   particleCounts,
 }: ParticleDistributionPieProps) => {
-  const data = (
+  // Build raw data
+  const rawData = (
     Object.keys(POLLUTANT_INFO) as Array<keyof typeof POLLUTANT_INFO>
   ).map((key) => {
-    const rawValue = Number(particleCounts[key]);
-    const value = Number.isFinite(rawValue) && rawValue > 0 ? rawValue : 0;
+    const numeric = Number(particleCounts[key]);
+    const value = Number.isFinite(numeric) && numeric > 0 ? numeric : 0;
+
     return {
       key,
       label: POLLUTANT_INFO[key].label,
@@ -539,10 +540,10 @@ const ParticleDistributionPie = ({
     };
   });
 
-  const hasData = data.some((item) => item.value > 0);
+  const data = rawData.filter((d) => d.value > 0);
   const totalCount = data.reduce((sum, item) => sum + item.value, 0);
 
-  if (!hasData) {
+  if (data.length === 0 || totalCount === 0) {
     return (
       <Typography
         variant="body2"
@@ -552,6 +553,60 @@ const ParticleDistributionPie = ({
       </Typography>
     );
   }
+
+  // SVG Math Helpers
+  const size = 220;
+  const center = size / 2;
+  const radius = 80;
+
+  let cumulativeValue = 0;
+
+  // Calculate paths for each slice
+  const slices = data.map((slice) => {
+    const startValue = cumulativeValue;
+    const endValue = cumulativeValue + slice.value;
+    cumulativeValue = endValue;
+
+    // Convert values to angles (radians)
+    // -Math.PI / 2 starts at 12 o'clock
+    const startAngle = (startValue / totalCount) * 2 * Math.PI - Math.PI / 2;
+    const endAngle = (endValue / totalCount) * 2 * Math.PI - Math.PI / 2;
+
+    // Calculate coordinates
+    const x1 = center + radius * Math.cos(startAngle);
+    const y1 = center + radius * Math.sin(startAngle);
+    const x2 = center + radius * Math.cos(endAngle);
+    const y2 = center + radius * Math.sin(endAngle);
+
+    // Determine if the slice is larger than 180 degrees (for the arc flag)
+    const largeArcFlag = slice.value / totalCount > 0.5 ? 1 : 0;
+
+    // Path command
+    // M center_x center_y : Move to center
+    // L x1 y1 : Line to start of arc
+    // A radius radius 0 large_arc_flag 1 x2 y2 : Arc to end
+    // Z : Close path
+    const pathData = [
+      `M ${center} ${center}`,
+      `L ${x1} ${y1}`,
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+      `Z`,
+    ].join(" ");
+
+    // Calculate label position (midpoint of the slice, pushed out slightly)
+    const midAngle = startAngle + (endAngle - startAngle) / 2;
+    // Position text at 70% of radius
+    const labelRadius = radius * 0.7;
+    const labelX = center + labelRadius * Math.cos(midAngle);
+    const labelY = center + labelRadius * Math.sin(midAngle);
+
+    return {
+      ...slice,
+      pathData,
+      labelX,
+      labelY,
+    };
+  });
 
   return (
     <Box
@@ -572,31 +627,81 @@ const ParticleDistributionPie = ({
           textAlign: "center",
         }}
       >
-        Particle Distribution ({totalCount} total)
+        Particle Distribution ({Math.round(totalCount)} total)
       </Typography>
-      <PieChart width={100} height={100}>
-        <Pie
-          data={data}
-          dataKey="value"
-          nameKey="label"
-          cx={130}
-          cy={110}
-          outerRadius={90}
-          innerRadius={0}
-          labelLine={false}
-          label={({ value }) => (value > 0 ? `${value}` : "")}
-          isAnimationActive={false}
-        >
-          {data.map((entry) => (
-            <Cell
-              key={entry.key}
-              fill={entry.color}
-              stroke="#ffffff"
-              strokeWidth={1}
-            />
+
+      <Box
+        sx={{
+          position: "relative",
+          width: size,
+          height: size,
+        }}
+      >
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          {slices.map((slice) => (
+            <g key={slice.key}>
+              <path
+                d={slice.pathData}
+                fill={slice.color}
+                stroke="#ffffff"
+                strokeWidth="1"
+              />
+              {/* Simple Label on top of slice if it's big enough */}
+              {slice.value / totalCount > 0.05 && (
+                <text
+                  x={slice.labelX}
+                  y={slice.labelY}
+                  fill="#000"
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                    pointerEvents: "none",
+                  }}
+                >
+                  {slice.value}
+                </text>
+              )}
+            </g>
           ))}
-        </Pie>
-      </PieChart>
+        </svg>
+      </Box>
+
+      {/* Legend */}
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          gap: "1rem",
+          marginTop: "0.5rem",
+          width: "100%",
+        }}
+      >
+        {data.map((item) => (
+          <Box
+            key={item.key}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                backgroundColor: item.color,
+              }}
+            />
+            <Typography variant="caption" sx={{ color: "#333" }}>
+              {item.label}: <strong>{item.value}</strong>
+            </Typography>
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 };

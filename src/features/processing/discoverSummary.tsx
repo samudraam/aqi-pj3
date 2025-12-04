@@ -1,6 +1,7 @@
 import { Box, Typography, Paper, Chip } from "@mui/material";
 import { motion } from "framer-motion";
 import ProcessingHeader from "../../components/processing-header";
+import CustomCursor from "../../components/customCursor";
 
 const particleO3 = `${import.meta.env.BASE_URL}thumbnail_new_O3.png`;
 const particlePM25 = `${import.meta.env.BASE_URL}thumbnail_new_PM2.5.png`;
@@ -99,6 +100,8 @@ const particleColors: Record<
  */
 const DiscoverSummaryPage = () => {
   return (
+    <>
+    <CustomCursor />
     <Box
       component="main"
       role="main"
@@ -276,6 +279,7 @@ const DiscoverSummaryPage = () => {
         </Box>
       </Box>
     </Box>
+    </>
   );
 };
 

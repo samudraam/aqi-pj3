@@ -53,6 +53,7 @@ export const MacroView = () => {
 
   const particleCount = resolvedTargetCount;
   const aqi = airQualityDetails?.aqi;
+  const visibility = airQualityDetails?.visibility;
 
   return (
     <div
@@ -74,7 +75,7 @@ export const MacroView = () => {
       >
         <ProcessingHeader
           currentStep={2}
-          prevRoute="/"
+          prevRoute="/aqi"
           nextRoute="/microview"
         />
       </Box>
@@ -166,6 +167,23 @@ export const MacroView = () => {
             />
           </form>
 
+          <Box
+            sx={{
+              marginBottom: "1rem",
+              padding: "0.75rem",
+              backgroundColor: "rgba(25, 118, 210, 0.1)",
+              borderRadius: "8px",
+              border: "1px solid rgba(25, 118, 210, 0.2)",
+            }}
+          >
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: "bold", color: "#1976d2" }}
+            >
+              Enter a city and compare the air quality with other cities
+            </Typography>
+          </Box>
+
           {/* Particle Count */}
           <Box
             sx={{
@@ -223,6 +241,25 @@ export const MacroView = () => {
             }}
           >
             <AqiSlider aqi={aqi} />
+          </Box>
+          {/* Visibility */}
+          <Box
+            sx={{
+              marginBottom: "1rem",
+              padding: "0.75rem",
+              backgroundColor: "rgba(0, 0, 0, 0.05)",
+              borderRadius: "8px",
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{ color: "#666", marginBottom: "0.25rem" }}
+            >
+              Visibility (how far you can see)
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold", color: "#333" }}>
+              {visibility} meters
+            </Typography>
           </Box>
         </Collapse>
       </Paper>
