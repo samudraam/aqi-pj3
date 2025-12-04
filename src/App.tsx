@@ -11,6 +11,9 @@ import { OptimizedDebugParticlesOnly } from "./features/processing/optimized-par
 import ParticleView from "./features/processing/oldsketches/particleView";
 import ConclusionPage from "./features/processing/conclusion";
 import DiscoverSummaryPage from "./features/processing/discoverSummary";
+import { MacroView } from "./features/processing/macroview";
+import { MicroView } from "./features/processing/microview";
+
 /**
  * Application routing and providers.
  */
@@ -25,6 +28,8 @@ const App = () => (
         <Route path="/examine" element={<ExaminePage />} />
         <Route path="/more" element={<MorePage />} />
         <Route path="/discover-summary" element={<DiscoverSummaryPage />} />
+        <Route path="/macroview" element={<MacroView />} />
+        <Route path="/microview" element={<MicroView />} />
         <Route
           path="/particles-debug"
           element={<OptimizedDebugParticlesOnly />}

@@ -78,7 +78,7 @@ const AqiPage = () => {
           justifyContent: "center",
         }}
       >
-        <ProcessingHeader currentStep={1} prevRoute="/mist" nextRoute="/examine" />
+        <ProcessingHeader currentStep={1} prevRoute="/discover-summary" nextRoute="/macroview" />
       </Box>
       
 

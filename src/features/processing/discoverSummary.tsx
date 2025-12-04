@@ -107,7 +107,7 @@ const DiscoverSummaryPage = () => {
         minWidth: "100vw",
         position: "relative",
         overflow: "auto",
-        backgroundColor: "#FAFAFA",
+        background: "linear-gradient(to bottom, #FFFFFF 0%, #1B9CD0 100%)",
       }}
     >
       <Box

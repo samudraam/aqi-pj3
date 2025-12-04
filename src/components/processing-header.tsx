@@ -213,7 +213,7 @@ const ProcessingHeaderComponent = ({
         px: { xs: 2.5, md: 4 },
         py: { xs: 2.5, md: 4 },
         bgcolor: "#5AD1FF",
-        boxShadow: "0px 15px 35px rgba(0,0,0,0.35)",
+        //boxShadow: "0px 15px 35px rgba(0,0,0,0.35)",
       }}
     >
       <Box sx={{ width: 48, display: "flex", justifyContent: "flex-start" }}>

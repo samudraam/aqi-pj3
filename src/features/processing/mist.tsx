@@ -98,7 +98,7 @@ const MistPage = () => {
                 <Typography
                   sx={{
                     textAlign: "center",
-                    fontFamily: "Inter",
+                    fontFamily: "Raleway",
                     color: "#000000",
                     fontSize: { xs: "2rem", sm: "2rem", md: "3rem" },
                     fontWeight: 500,
@@ -112,7 +112,7 @@ const MistPage = () => {
                   sx={{
                     pt: 2,
                     textAlign: "center",
-                    fontFamily: "Inter",
+                    fontFamily: "Raleway",
                     color: "#000000",
                     fontSize: { xs: "1.25rem", sm: "1.25rem", md: "1.25rem" },
                     fontWeight: 500,
