@@ -196,7 +196,7 @@ const CustomCursor = () => {
         width: "100vw",
         height: "100vh",
         pointerEvents: "none",
-        zIndex: 20,
+        zIndex: 25,
         cursor: "none",
       }}
     />

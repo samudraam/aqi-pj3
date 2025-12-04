@@ -1,10 +1,10 @@
-import { Box, Typography, Button, Fab } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import { useCallback } from "react";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Timeline from "../../components/timeline";
-
+import ProcessingHeader from "../../components/processing-header";
+import grass from "../../assets/grass2.png";
+import { useNavigate } from "react-router-dom";
+import CustomCursor from "../../components/customCursor";
 /**
  * Conclusion page that displays the reality of air quality impact.
  * Shows statistics and facts about air pollution, with options to restart or share.
@@ -14,10 +14,6 @@ const ConclusionPage = () => {
 
   const handleRestart = useCallback(() => {
     navigate("/");
-  }, [navigate]);
-
-  const handleNavigatePrevious = useCallback(() => {
-    navigate("/particles-debug");
   }, [navigate]);
 
   const handleShare = useCallback(() => {
@@ -48,196 +44,251 @@ const ConclusionPage = () => {
   ];
 
   return (
-    <Box
-      component="main"
-      role="main"
-      sx={{
-        minHeight: "100vh",
-        minWidth: "100vw",
-        bgcolor: "#DC143C",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        px: { xs: 2, sm: 4 },
-        py: 4,
-        position: "relative",
-      }}
-    >
-      <Timeline currentStep="end" />
-
+    <>
+      <CustomCursor />
       <Box
         sx={{
+          position: "relative",
+          zIndex: 210,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <ProcessingHeader
+          currentStep={4}
+          prevRoute="/microview"
+          nextRoute="/"
+        />
+      </Box>
+      <Box
+        component="main"
+        role="main"
+        sx={{
+          minHeight: "100vh",
+          minWidth: "100vw",
+          background: "linear-gradient(180deg, #6CB2CE 0%, #FFFFFF 72%)",
+          backgroundOpacity: 0.5,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          flex: 1,
-          maxWidth: 800,
-          width: "100%",
-          gap: 4,
-          mt: 4,
+          justifyContent: "flex-start",
+          px: { xs: 2, sm: 4 },
+          py: 4,
+          position: "relative",
         }}
       >
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Typography
-            variant="h5"
-            align="center"
-            sx={{
-              fontWeight: 400,
-              color: "#ffffff",
-              mb: 4,
-            }}
-          >
-            So what? Here's the reality
-          </Typography>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Typography
-            variant="h3"
-            align="center"
-            sx={{
-              fontWeight: 600,
-              color: "#ffffff",
-              mb: 6,
-              fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
-              lineHeight: 1.2,
-            }}
-          >
-            These aren't just numbers. You breathe in a mixture of particles
-            20,000 times a day
-          </Typography>
-        </motion.div>
-
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 3,
-            width: "100%",
-            mb: 4,
-          }}
-        >
-          {bulletPoints.map((point, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-            >
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 400,
-                  color: "#ffffff",
-                  fontSize: { xs: "1rem", sm: "1.25rem" },
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: 1,
-                }}
-              >
-                <span style={{ marginRight: "8px" }}>→</span>
-                {point}
-              </Typography>
-            </motion.div>
-          ))}
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            gap: 3,
-            width: "100%",
+            alignItems: "center",
             justifyContent: "center",
-            flexWrap: "wrap",
-            mt: 4,
+            backgroundColor: "rgba(255, 255, 255, 0.80)",
+            zIndex: 20,
+            borderRadius: 2,
+            padding: { xs: 2, sm: 3, md: 4 },
+            flex: 1,
+            width: { xs: "95%", sm: "85%", md: "75%", lg: "70%" },
+            maxWidth: "1200px",
+            gap: { xs: 2, sm: 3, md: 4 },
+            mt: { xs: 2, sm: 3, md: 4 },
+            boxSizing: "border-box",
+            overflow: "hidden",
           }}
         >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
+            transition={{ duration: 0.5 }}
           >
-            <Button
-              variant="outlined"
-              onClick={handleRestart}
+            <Typography
+              variant="h5"
+              align="center"
               sx={{
-                borderColor: "#FFD700",
-                borderWidth: 2,
-                color: "#ffffff",
-                px: 4,
-                py: 1.5,
-                fontSize: "1rem",
-                fontWeight: 500,
-                textTransform: "none",
-                borderRadius: 2,
-                "&:hover": {
-                  borderColor: "#FFD700",
-                  borderWidth: 2,
-                  backgroundColor: "rgba(255, 215, 0, 0.1)",
-                },
+                fontWeight: 400,
+                fontFamily: "Raleway",
+                color: "#000000",
+                mb: { xs: 1, sm: 2 },
+                px: { xs: 1, sm: 2 },
+                fontSize: { xs: "1.25rem", sm: "1.5rem", md: "1.75rem" },
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
               }}
-              aria-label="Restart the experience"
             >
-              Restart the experience
-            </Button>
+              So what? Here's the reality
+            </Typography>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.9 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Button
-              variant="contained"
-              onClick={handleShare}
+            <Typography
+              variant="h3"
+              align="center"
               sx={{
-                backgroundColor: "#FFD700",
+                fontWeight: 600,
                 color: "#000000",
-                px: 4,
-                py: 1.5,
-                fontSize: "1rem",
-                fontWeight: 500,
-                textTransform: "none",
-                borderRadius: 2,
-                "&:hover": {
-                  backgroundColor: "#FFE44D",
+                fontFamily: "Raleway",
+                mr: { xs: 0, sm: 2, md: 6 },
+                ml: { xs: 0, sm: 2, md: 6 },
+                px: { xs: 1, sm: 2 },
+                fontSize: {
+                  xs: "1.5rem",
+                  sm: "2rem",
+                  md: "2.5rem",
+                  lg: "3rem",
                 },
+                lineHeight: 1.2,
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
               }}
-              aria-label="Share with others"
             >
-              Share with others
-            </Button>
+              These aren't just numbers. You breathe in a mixture of particles
+              20,000 times a day
+            </Typography>
           </motion.div>
-        </Box>
-      </Box>
 
-      <Fab
-        color="success"
-        aria-label="Go back"
-        onClick={handleNavigatePrevious}
-        sx={{
-          position: "absolute",
-          top: 24,
-          left: 24,
-          width: 72,
-          height: 72,
-          backgroundColor: "#FFD400",
-          "&:hover": { backgroundColor: "#FFE254" },
-        }}
-      >
-        <ArrowBackIcon sx={{ fontSize: 36, color: "#000000" }} />
-      </Fab>
-    </Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              width: "100%",
+              maxWidth: { xs: "100%", sm: "90%", md: "80%", lg: "70%" },
+              fontFamily: "Raleway",
+              mx: "auto",
+              px: { xs: 1, sm: 2 },
+              mb: 2,
+              boxSizing: "border-box",
+            }}
+          >
+            {bulletPoints.map((point, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+              >
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 400,
+                    fontFamily: "Raleway",
+                    color: "#000000",
+                    fontSize: { xs: "0.9rem", sm: "1rem", md: "1.25rem" },
+                    display: "flex",
+                    alignItems: "flex-start",
+                    justifyContent: "flex-start",
+                    textAlign: "left",
+                    gap: 1,
+                    wordWrap: "break-word",
+                    overflowWrap: "break-word",
+                    width: "100%",
+                  }}
+                >
+                  <span style={{ marginRight: "8px", flexShrink: 0 }}>→</span>
+                  <span style={{ flex: 1 }}>{point}</span>
+                </Typography>
+              </motion.div>
+            ))}
+          </Box>
+
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 600, fontFamily: "Raleway", color: "#000000", fontSize: { xs: "0.9rem", sm: "1rem", md: "1.25rem" }, display: "flex", alignItems: "flex-start", justifyContent: "flex-start", textAlign: "center", gap: 1, wordWrap: "break-word", overflowWrap: "break-word", width: "100%" }}>
+            How often does your friends or family think about air? <br /> The right to clean air is universal.             </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              gap: { xs: 2, sm: 3 },
+              width: "100%",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              mt: { xs: 2, sm: 3, md: 4 },
+              px: { xs: 1, sm: 2 },
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+            >
+              <Button
+                variant="outlined"
+                sx={{
+                  borderColor: "#0D6485",
+                  borderWidth: 2,
+                  color: "#000000",
+                  backgroundColor: "#FFFFFF",
+                  px: { xs: 2, sm: 3, md: 4 },
+                  py: { xs: 1, sm: 1.25, md: 1.5 },
+                  fontSize: { xs: "0.875rem", sm: "0.9375rem", md: "1rem" },
+                  fontWeight: 500,
+                  textTransform: "none",
+                  borderRadius: 2,
+                  whiteSpace: "nowrap",
+                  "&:hover": {
+                    borderColor: "#0982B1",
+                    borderWidth: 2,
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+                aria-label="Restart the experience"
+                onClick={handleRestart}
+              >
+                Restart the experience
+              </Button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.9 }}
+            >
+              <Button
+                variant="contained"
+                onClick={handleShare}
+                sx={{
+                  backgroundColor: "#5AD1FF",
+                  color: "#000000",
+                  px: { xs: 2, sm: 3, md: 4 },
+                  py: { xs: 1, sm: 1.25, md: 1.5 },
+                  fontSize: { xs: "0.875rem", sm: "0.9375rem", md: "1rem" },
+                  fontWeight: 600,
+                  textTransform: "none",
+                  borderRadius: 2,
+                  whiteSpace: "nowrap",
+                  "&:hover": {
+                    backgroundColor: "#88DEFF",
+                  },
+                }}
+                aria-label="Share with others"
+              >
+                Share with others
+              </Button>
+            </motion.div>
+          </Box>
+        </Box>
+        <Box
+          aria-hidden
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            height: { xs: "32vh", sm: "38vh", md: "60vh" },
+            backgroundImage: `url(${grass})`,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom",
+            zIndex: 10,
+          }}
+        />
+      </Box>
+    </>
   );
 };
 

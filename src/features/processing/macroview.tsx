@@ -1,8 +1,16 @@
 import { useRef, useState, useEffect } from "react";
 import type { FormEvent } from "react";
-import { Box, Typography, Paper, Collapse, IconButton } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Paper,
+  Collapse,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import InfoOutlineIcon from "@mui/icons-material/InfoOutline";
 import ProcessingSketch2 from "./processing-sketch-4";
 import { useCity } from "../../providers/use-city";
 import { AqiSlider } from "../../components/aqi-slider";
@@ -174,6 +182,7 @@ export const MacroView = () => {
               backgroundColor: "rgba(25, 118, 210, 0.1)",
               borderRadius: "8px",
               border: "1px solid rgba(25, 118, 210, 0.2)",
+              display: "flex",
             }}
           >
             <Typography
@@ -187,35 +196,63 @@ export const MacroView = () => {
           {/* Particle Count */}
           <Box
             sx={{
+              display: "flex",
+              gap: "7rem",
               marginBottom: "1rem",
-              padding: "0.75rem",
-              backgroundColor: "rgba(0, 0, 0, 0.05)",
               borderRadius: "8px",
+              backgroundColor: "rgba(0, 0, 0, 0.05)",
+              alignItems: "center",
+
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{ color: "#666", marginBottom: "0.25rem" }}
+            <Box
+              sx={{
+                padding: "0.75rem",
+              }}
             >
-              Particle Count
-            </Typography>
-            <Typography variant="h6" sx={{ fontWeight: "bold", color: "#333" }}>
-              {particleCount}{" "}
-              <span
-                style={{ fontSize: "1rem", fontWeight: 500, marginLeft: 3 }}
+              <Typography
+                variant="body2"
+                sx={{ color: "#666", marginBottom: "0.25rem" }}
               >
-                / 300
-              </span>
-            </Typography>
+                Particle Count
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: "bold", color: "#333" }}
+              >
+                {particleCount}{" "}
+                <span
+                  style={{ fontSize: "1rem", fontWeight: 500, marginLeft: 3 }}
+                >
+                  / 300
+                </span>
+              </Typography>
+            </Box>
+            <Tooltip
+              title="This value is derived from the Air Quality Index (AQI), scaled between 80 (Good) and 300 (Very Poor)."
+              arrow
+            >
+              <InfoOutlineIcon
+                sx={{ fontSize: "1.5rem", color: "#666", cursor: "help" }}
+              />
+            </Tooltip>
           </Box>
 
           {/* AQI Value */}
           <Box
             sx={{
+              display: "flex",
+              gap: "6rem",
               marginBottom: "1rem",
-              padding: "0.75rem",
-              backgroundColor: "rgba(0, 0, 0, 0.05)",
               borderRadius: "8px",
+              backgroundColor: "rgba(0, 0, 0, 0.05)",
+              alignItems: "center",
+
+            }}
+          >
+          <Box
+            sx={{
+              padding: "0.75rem",
             }}
           >
             <Typography
@@ -233,6 +270,15 @@ export const MacroView = () => {
               </span>
             </Typography>
           </Box>
+          <Tooltip
+              title="The Air Quality Index (AQI) is a number between 1 and 5 that represents the quality of the air. The higher the AQI, the worse the air quality."
+              arrow
+            >
+              <InfoOutlineIcon
+                sx={{ fontSize: "1.5rem", color: "#666", cursor: "help" }}
+              />
+            </Tooltip>
+          </Box>
 
           {/* AQI Slider */}
           <Box
@@ -245,10 +291,17 @@ export const MacroView = () => {
           {/* Visibility */}
           <Box
             sx={{
-              marginBottom: "1rem",
-              padding: "0.75rem",
-              backgroundColor: "rgba(0, 0, 0, 0.05)",
+              display: "flex",
               borderRadius: "8px",
+              backgroundColor: "rgba(0, 0, 0, 0.05)",
+              alignItems: "center",
+              gap: "0.3rem",
+
+            }}
+          >
+          <Box
+            sx={{
+              padding: "0.75rem",
             }}
           >
             <Typography
@@ -260,6 +313,15 @@ export const MacroView = () => {
             <Typography variant="h6" sx={{ fontWeight: "bold", color: "#333" }}>
               {visibility} meters
             </Typography>
+          </Box>
+          <Tooltip
+              title="This sketch uses gaussian blur to simulate the light scattering effects that particles (especially fine particles) have on visibility. Visibility is the distance at which an object can be seen. The connection between visibility and air quality is not always direct, but it is generally a good indicator of pm2.5 and pm10 levels."
+              arrow
+            >
+              <InfoOutlineIcon
+                sx={{ fontSize: "1.5rem", color: "#666", cursor: "help" }}
+              />
+            </Tooltip>
           </Box>
         </Collapse>
       </Paper>
