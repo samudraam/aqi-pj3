@@ -1,11 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Fab, Typography } from "@mui/material";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Box, Typography } from "@mui/material";
+
 import { useCity } from "../../providers/use-city";
 import ProcessingSketch from "./processing-sketch-4";
-import Timeline from "../../components/timeline";
 import { AnimatePresence, motion } from "motion/react";
 
 /**
@@ -15,7 +13,6 @@ const MistPage = () => {
   const { airQualityDetails } = useCity();
   const navigate = useNavigate();
   const [showSecondText, setShowSecondText] = useState(false);
-  //const [ctaVisible, setCtaVisible] = useState<boolean>(false);
 
   useEffect(() => {
     if (!airQualityDetails) {
@@ -27,13 +24,13 @@ const MistPage = () => {
   //   setCtaVisible(true);
   // }, []);
 
-  const handleNavigateNext = useCallback(() => {
-    navigate("/examine");
-  }, [navigate]);
+  // const handleNavigateNext = useCallback(() => {
+  //   navigate("/examine");
+  // }, [navigate]);
 
-  const handleNavigatePrevious = useCallback(() => {
-    navigate("/");
-  }, [navigate]);
+  // const handleNavigatePrevious = useCallback(() => {
+  //   navigate("/");
+  // }, [navigate]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -55,84 +52,7 @@ const MistPage = () => {
         overflow: "hidden",
       }}
     >
-      <Box
-        component="header"
-        sx={{
-          position: "sticky",
-          top: 0,
-          left: 0,
-          width: "100%",
-          bgcolor: "#FFD400",
-          zIndex: 20,
-          boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)",
-        }}
-      >
-        <Box
-          sx={{
-            position: "relative",
-            maxWidth: 1280,
-            mx: "auto",
-            px: { xs: 2, sm: 50 },
-            py: { xs: 1.5, sm: 2 },
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Box
-            aria-label="Go back"
-            onClick={handleNavigatePrevious}
-            sx={{
-              position: "absolute",
-              left: { xs: 12, sm: 18, md: 26 },
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: 64,
-              height: 64,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-            }}
-          >
-            <ArrowBackIcon sx={{ fontSize: 36, color: "#000000" }} />
-          </Box>
-
-          <Timeline currentStep="discover" />
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 3, delay: 3 }}
-            style={{
-              position: "absolute",
-              right: 16,
-              top: "50%",
-              transform: "translateY(-50%)",
-            }}
-          >
-            <Box
-              color="success"
-              aria-label="Show results"
-              onClick={handleNavigateNext}
-              sx={{
-                position: "absolute",
-                right: { xs: 12, sm: 16, md: 24 },
-                top: "50%",
-                transform: "translateY(-50%)",
-                width: 64,
-                height: 64,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
-            >
-              <ArrowForwardIcon sx={{ fontSize: 32, color: "inherit" }} />
-            </Box>
-          </motion.div>
-        </Box>
-      </Box>
+      
       <ProcessingSketch />
       <Box
         sx={{
@@ -155,7 +75,7 @@ const MistPage = () => {
             >
               <Typography
                 sx={{
-                  pt: 5,
+                  pt: 10,
                   textAlign: "center",
                   fontFamily: "Inter",
                   color: "#000000",
@@ -194,9 +114,9 @@ const MistPage = () => {
             >
               <Typography
                 sx={{
-                  pt: 5,
+                  pt: 10,
                   textAlign: "center",
-                  fontFamily: "Inter",
+                  fontFamily: "Raleway",
                   color: "#000000",
                   fontSize: { xs: "2rem", sm: "2rem", md: "3rem" },
                   fontWeight: 500,
@@ -210,7 +130,7 @@ const MistPage = () => {
                 sx={{
                   pt: 2,
                   textAlign: "center",
-                  fontFamily: "Inter",
+                  fontFamily: "Raleway",
                   color: "#000000",
                   fontSize: { xs: "1rem", sm: "1rem", md: "1.5rem" },
                   fontWeight: 400,

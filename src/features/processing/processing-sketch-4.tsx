@@ -152,10 +152,12 @@ const ProcessingSketch2 = () => {
 
         let cam: p5.MediaElement | null = null;
         let camReady = false;
-        let pgLowA: p5.Graphics;
-        let pgLowB: p5.Graphics;
-        let pgTemp: p5.Graphics;
-        let maskG: p5.Graphics;
+        let camWidth = 640;
+        let camHeight = 480;
+        let pgLowA: p5.Graphics | null = null;
+        let pgLowB: p5.Graphics | null = null;
+        let pgTemp: p5.Graphics | null = null;
+        let maskG: p5.Graphics | null = null;
         let lowResW: number;
         let lowResH: number;
 
@@ -268,6 +270,25 @@ const ProcessingSketch2 = () => {
             const videoElement = capture.elt as HTMLVideoElement;
             cameraElementRef.current = videoElement;
 
+            const syncCameraDimensions = () => {
+              const intrinsicWidth = videoElement.videoWidth;
+              const intrinsicHeight = videoElement.videoHeight;
+              if (intrinsicWidth > 0 && intrinsicHeight > 0) {
+                camWidth = intrinsicWidth;
+                camHeight = intrinsicHeight;
+                return;
+              }
+
+              const fallbackWidth = videoElement.width;
+              const fallbackHeight = videoElement.height;
+              if (fallbackWidth > 0 && fallbackHeight > 0) {
+                camWidth = fallbackWidth;
+                camHeight = fallbackHeight;
+              }
+            };
+
+            syncCameraDimensions();
+
             const initialStream = videoElement.srcObject;
             if (initialStream instanceof MediaStream) {
               mediaStreamRef.current = initialStream;
@@ -277,6 +298,7 @@ const ProcessingSketch2 = () => {
               if (isEffectCancelled) {
                 return;
               }
+              syncCameraDimensions();
               camReady = true;
               setIsLoading(false);
               const stream = videoElement.srcObject;
@@ -309,6 +331,9 @@ const ProcessingSketch2 = () => {
         };
 
         const resetMask = () => {
+          if (!maskG) {
+            return;
+          }
           maskG.background(255);
         };
 
@@ -339,10 +364,31 @@ const ProcessingSketch2 = () => {
           precision highp float;
           varying vec2 vTexCoord;
           uniform sampler2D tex;
+          uniform vec2 camResolution;
+          uniform vec2 outputResolution;
+
+          vec2 coverUV(vec2 uv, vec2 srcResolution, vec2 dstResolution) {
+            float srcAspect = srcResolution.x / max(srcResolution.y, 0.0001);
+            float dstAspect = dstResolution.x / max(dstResolution.y, 0.0001);
+            vec2 mapped = uv;
+
+            if (dstAspect > srcAspect) {
+              float scale = srcAspect / dstAspect;
+              float offset = (1.0 - scale) * 0.5;
+              mapped.y = mapped.y * scale + offset;
+            } else {
+              float scale = dstAspect / srcAspect;
+              float offset = (1.0 - scale) * 0.5;
+              mapped.x = mapped.x * scale + offset;
+            }
+
+            return mapped;
+          }
           
           void main() {
             vec2 uv = vec2(1.0 - vTexCoord.x, 1.0 - vTexCoord.y);
-            gl_FragColor = texture2D(tex, uv);
+            vec2 cover = coverUV(uv, camResolution, outputResolution);
+            gl_FragColor = texture2D(tex, cover);
           }
         `;
 
@@ -412,6 +458,7 @@ const ProcessingSketch2 = () => {
           uniform sampler2D blurTex;
           uniform sampler2D maskTex;
           uniform vec2 resolution;
+          uniform vec2 camResolution;
           uniform float time;
           uniform float refractAmt;
           uniform float grainAmt;
@@ -435,11 +482,30 @@ const ProcessingSketch2 = () => {
             
             return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
           }
+
+          vec2 coverUV(vec2 uv, vec2 srcResolution, vec2 dstResolution) {
+            float srcAspect = srcResolution.x / max(srcResolution.y, 0.0001);
+            float dstAspect = dstResolution.x / max(dstResolution.y, 0.0001);
+            vec2 mapped = uv;
+
+            if (dstAspect > srcAspect) {
+              float scale = srcAspect / dstAspect;
+              float offset = (1.0 - scale) * 0.5;
+              mapped.y = mapped.y * scale + offset;
+            } else {
+              float scale = dstAspect / srcAspect;
+              float offset = (1.0 - scale) * 0.5;
+              mapped.x = mapped.x * scale + offset;
+            }
+
+            return mapped;
+          }
           
           void main() {
             vec2 uv = vec2(vTexCoord.x, 1.0 - vTexCoord.y);
             vec2 mirroredCamUV = vec2(1.0 - uv.x, uv.y);
             float maskValue = texture2D(maskTex, uv).r;
+            vec2 camUV = coverUV(mirroredCamUV, camResolution, resolution);
             
             vec2 noiseUV = uv * resolution * 0.5;
             float n1 = noise(noiseUV + time * 0.1);
@@ -450,7 +516,7 @@ const ProcessingSketch2 = () => {
             vec2 refractedUV = uv + refractOffset * maskValue;
             refractedUV = clamp(refractedUV, 0.0, 1.0);
             
-            vec4 sharpColor = texture2D(camTex, mirroredCamUV);
+            vec4 sharpColor = texture2D(camTex, camUV);
             vec4 blurredColor = texture2D(blurTex, refractedUV);
             vec4 color = mix(sharpColor, blurredColor, maskValue);
             
@@ -515,24 +581,51 @@ const ProcessingSketch2 = () => {
           }
         };
 
-        s.setup = () => {
-          s.createCanvas(s.windowWidth, s.windowHeight, s.WEBGL);
-          s.pixelDensity(1);
-
+        const initGraphicsBuffers = () => {
           lowResW = Math.floor(s.width / DOWNSAMPLE);
           lowResH = Math.floor(s.height / DOWNSAMPLE);
 
-          pgLowA = s.createGraphics(lowResW, lowResH, s.WEBGL);
-          pgLowB = s.createGraphics(lowResW, lowResH, s.WEBGL);
-          pgLowA.pixelDensity(1);
-          pgLowB.pixelDensity(1);
+          const ensureWebGLBuffer = (
+            buffer: p5.Graphics | null,
+            width: number,
+            height: number
+          ) => {
+            if (!buffer) {
+              const newBuffer = s.createGraphics(width, height, s.WEBGL);
+              newBuffer.pixelDensity(1);
+              return newBuffer;
+            }
+            buffer.resizeCanvas(width, height);
+            buffer.pixelDensity(1);
+            return buffer;
+          };
 
-          pgTemp = s.createGraphics(s.width, s.height, s.WEBGL);
-          pgTemp.pixelDensity(1);
+          const ensure2DBuffer = (
+            buffer: p5.Graphics | null,
+            width: number,
+            height: number
+          ) => {
+            if (!buffer) {
+              const newBuffer = s.createGraphics(width, height);
+              newBuffer.pixelDensity(1);
+              return newBuffer;
+            }
+            buffer.resizeCanvas(width, height);
+            buffer.pixelDensity(1);
+            return buffer;
+          };
 
-          maskG = s.createGraphics(s.width, s.height);
-          maskG.pixelDensity(1);
+          pgLowA = ensureWebGLBuffer(pgLowA, lowResW, lowResH);
+          pgLowB = ensureWebGLBuffer(pgLowB, lowResW, lowResH);
+          pgTemp = ensureWebGLBuffer(pgTemp, s.width, s.height);
+          maskG = ensure2DBuffer(maskG, s.width, s.height);
           resetMask();
+        };
+
+        s.setup = () => {
+          s.createCanvas(s.windowWidth, s.windowHeight, s.WEBGL);
+          s.pixelDensity(1);
+          initGraphicsBuffers();
 
           setupCamera();
           compileShaders();
@@ -556,52 +649,74 @@ const ProcessingSketch2 = () => {
             return;
           }
 
+          if (!pgLowA || !pgLowB || !pgTemp || !maskG) {
+            s.background(20);
+            return;
+          }
+
+          const lowBufferA = pgLowA;
+          const lowBufferB = pgLowB;
+          const tempBuffer = pgTemp;
+          const maskBuffer = maskG;
+
           updateParticles();
 
           // Step 1: Copy camera to low-res buffer
-          pgLowA.push();
-          pgLowA.shader(copyShader);
+          lowBufferA.push();
+          lowBufferA.shader(copyShader);
           copyShader.setUniform("tex", cam);
-          pgLowA.rect(0, 0, pgLowA.width, pgLowA.height);
-          pgLowA.pop();
+          copyShader.setUniform("camResolution", [camWidth, camHeight]);
+          copyShader.setUniform("outputResolution", [
+            lowBufferA.width,
+            lowBufferA.height,
+          ]);
+          lowBufferA.rect(0, 0, lowBufferA.width, lowBufferA.height);
+          lowBufferA.pop();
 
           // Step 2: Horizontal blur
-          pgLowB.push();
-          pgLowB.shader(blurHShader);
-          blurHShader.setUniform("tex", pgLowA);
-          blurHShader.setUniform("resolution", [pgLowA.width, pgLowA.height]);
+          lowBufferB.push();
+          lowBufferB.shader(blurHShader);
+          blurHShader.setUniform("tex", lowBufferA);
+          blurHShader.setUniform("resolution", [
+            lowBufferA.width,
+            lowBufferA.height,
+          ]);
           blurHShader.setUniform("radius", blurRadius);
-          pgLowB.rect(0, 0, pgLowB.width, pgLowB.height);
-          pgLowB.pop();
+          lowBufferB.rect(0, 0, lowBufferB.width, lowBufferB.height);
+          lowBufferB.pop();
 
           // Step 3: Vertical blur
-          pgLowA.push();
-          pgLowA.shader(blurVShader);
-          blurVShader.setUniform("tex", pgLowB);
-          blurVShader.setUniform("resolution", [pgLowB.width, pgLowB.height]);
+          lowBufferA.push();
+          lowBufferA.shader(blurVShader);
+          blurVShader.setUniform("tex", lowBufferB);
+          blurVShader.setUniform("resolution", [
+            lowBufferB.width,
+            lowBufferB.height,
+          ]);
           blurVShader.setUniform("radius", blurRadius);
-          pgLowA.rect(0, 0, pgLowA.width, pgLowA.height);
-          pgLowA.pop();
+          lowBufferA.rect(0, 0, lowBufferA.width, lowBufferA.height);
+          lowBufferA.pop();
 
           // Step 4: Composite frost effect
-          pgTemp.push();
-          pgTemp.shader(compositeShader);
+          tempBuffer.push();
+          tempBuffer.shader(compositeShader);
           compositeShader.setUniform("camTex", cam);
-          compositeShader.setUniform("blurTex", pgLowA);
-          compositeShader.setUniform("maskTex", maskG);
+          compositeShader.setUniform("blurTex", lowBufferA);
+          compositeShader.setUniform("maskTex", maskBuffer);
           compositeShader.setUniform("resolution", [s.width, s.height]);
+          compositeShader.setUniform("camResolution", [camWidth, camHeight]);
           compositeShader.setUniform("time", s.millis() / 1000.0);
           compositeShader.setUniform("refractAmt", REFRACT_AMT);
           compositeShader.setUniform("grainAmt", GRAIN_AMT);
           compositeShader.setUniform("desatAmt", DESAT_AMT);
-          pgTemp.rect(0, 0, pgTemp.width, pgTemp.height);
-          pgTemp.pop();
+          tempBuffer.rect(0, 0, tempBuffer.width, tempBuffer.height);
+          tempBuffer.pop();
 
           // Step 5: Add particles
           s.push();
           s.shader(particleShader);
-          particleShader.setUniform("previousFrame", pgTemp);
-          particleShader.setUniform("maskTex", maskG);
+          particleShader.setUniform("previousFrame", tempBuffer);
+          particleShader.setUniform("maskTex", maskBuffer);
           particleShader.setUniform("resolution", [s.width, s.height]);
 
           const positions: number[] = [];
@@ -674,13 +789,14 @@ const ProcessingSketch2 = () => {
 
         s.windowResized = () => {
           s.resizeCanvas(s.windowWidth, s.windowHeight);
+          initGraphicsBuffers();
         };
       };
 
       if (!isEffectCancelled && sketchRef.current) {
         sketchInstanceRef.current = new p5(sketch, sketchRef.current);
       }
-    }, 50); // Small delay to ensure DOM is ready after route transition
+    }, 100); // Small delay to ensure DOM is ready after route transition
 
     return () => {
       isEffectCancelled = true;
@@ -699,6 +815,7 @@ const ProcessingSketch2 = () => {
           left: 0,
           width: "100vw",
           height: "100vh",
+          backgroundColor: "white",
           margin: 0,
           padding: 0,
           zIndex: 1,
