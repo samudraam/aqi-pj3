@@ -1,17 +1,14 @@
-import { useMemo, useState, useEffect, useCallback } from "react";
-import { Box, Typography, Paper, Chip, Fab } from "@mui/material";
+import { useMemo, useState, useEffect } from "react";
+import { Box, Typography, Paper, Chip } from "@mui/material";
 import { motion } from "framer-motion";
 import magnifierSrc from "../../assets/magnifier.png";
+import ProcessingHeader from "../../components/processing-header";
 const particleO3 = `${import.meta.env.BASE_URL}thumbnail_new_O3.png`;
 const particlePM25 = `${import.meta.env.BASE_URL}thumbnail_new_PM2.5.png`;
 const particlePM10 = `${import.meta.env.BASE_URL}thumbnail_new_PM10.png`;
 const particleCO2 = `${import.meta.env.BASE_URL}thumbnail_new_CO2.png`;
 const particleNO2 = `${import.meta.env.BASE_URL}thumbnail_new_NO2.png`;
-import ArrowForward from "@mui/icons-material/ArrowForward";
-import { useNavigate } from "react-router-dom";
-import Timeline from "../../components/timeline";
 type ParticleId = "pm10" | "pm25" | "o3" | "co" | "no2";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 const health = `${import.meta.env.BASE_URL}health.png`;
 
 type ParticleMeta = {
@@ -74,6 +71,32 @@ const baseParticles: ParticleMeta[] = [
     image: particleNO2,
   },
 ];
+
+const particleColors: Record<
+  ParticleId,
+  { backgroundColor: string; textColor: string }
+> = {
+  pm10: {
+    backgroundColor: "#FFF427", // Yellow (keep existing)
+    textColor: "#000000", // Black text
+  },
+  pm25: {
+    backgroundColor: "#E54C4C", // Red
+    textColor: "#FFFFFF", // White text
+  },
+  o3: {
+    backgroundColor: "#54E0F7", // Teal
+    textColor: "#000000", // Black text
+  },
+  co: {
+    backgroundColor: "#B7ED32", // Green
+    textColor: "#000000", // White text
+  },
+  no2: {
+    backgroundColor: "#8E5B00", // Orange
+    textColor: "#FFFFFF", // Black text
+  },
+};
 
 const ExaminePage = () => {
   /**
@@ -161,7 +184,6 @@ const ExaminePage = () => {
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [cursorVisible, setCursorVisible] = useState(false);
   const [hoveredId, setHoveredId] = useState<ParticleId | null>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     console.debug("hoveredId changed", hoveredId);
@@ -182,14 +204,6 @@ const ExaminePage = () => {
     setActiveParticle(null);
   };
 
-  const handleNavigateNext = useCallback(() => {
-    navigate("/aqi");
-  }, [navigate]);
-
-  const handleNavigatePrevious = useCallback(() => {
-    navigate("/mist");
-  }, [navigate]);
-
   return (
     <Box
       component="main"
@@ -202,15 +216,38 @@ const ExaminePage = () => {
         cursor: "crosshair",
       }}
       onPointerMove={(event) => {
-        setCursorPosition({ x: event.clientX+30, y: event.clientY+40 });
+        setCursorPosition({ x: event.clientX + 30, y: event.clientY + 40 });
         setCursorVisible(true);
       }}
       onPointerLeave={() => {
         setCursorVisible(false);
       }}
     >
-      <Timeline currentStep="discover" />
-      <Typography variant="body1" sx={{ textAlign: "center", fontWeight: 700, fontSize: { xs: '1rem', md: '1.5rem' }  }}>Hover each particle to learn more.</Typography>
+      <Box
+        sx={{
+          position: "relative",
+          zIndex: 210,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <ProcessingHeader currentStep={0} prevRoute="/mist" nextRoute="/discover-summary" />
+      </Box>
+      <Typography
+        variant="body1"
+        sx={{
+          textAlign: "center",
+          top: 150,
+          position: "absolute",
+          left: 0,
+          right: 0,
+          fontWeight: 600,
+          fontFamily: "Inter",
+          fontSize: { xs: "1rem", md: "1.5rem" },
+        }}
+      >
+        Hover over each particle to learn more.
+      </Typography>
       {particleInstances.map((particle) => {
         const isActive = hoveredId === particle.id;
         return (
@@ -253,8 +290,8 @@ const ExaminePage = () => {
           transition={{ duration: 0.18, ease: "easeOut" }}
           style={{
             position: "fixed",
-            top: 120,
-            left: 24,
+            top: 150,
+            left: 40,
             pointerEvents: "none",
             zIndex: 200,
           }}
@@ -268,29 +305,39 @@ const ExaminePage = () => {
               borderRadius: 3,
               boxShadow: 6,
               pointerEvents: "none",
+              backgroundColor: "#F5F5F5",
+              opacity: 0.85,
             }}
           >
             <Chip
               label={activeParticle.label}
-              sx={{ mb: 1.5, fontWeight: 600, backgroundColor: "#FFD400" }}
+              sx={{
+                mb: 1.5,
+                fontWeight: 600,
+                fontFamily: "Inter",
+                backgroundColor:
+                  particleColors[activeParticle.id].backgroundColor,
+                color: particleColors[activeParticle.id].textColor,
+              }}
               aria-hidden
             />
-            <Typography variant="body1" sx={{ mb: 1.5, fontWeight: 500 }}>
+            <Typography
+              variant="body1"
+              sx={{ ml: 0.5, mb: 5, color: "#000000", fontWeight: 500, fontFamily: "Inter" }}
+            >
               {activeParticle.description}
             </Typography>
-            <Box
-              sx={{ mb: 1.5, display: "flex", gap: 1, alignItems: "center" }}
-            >
+            <Box sx={{ mb: 2, display: "flex", gap: 1, alignItems: "center" }}>
               <img src={health} alt="Health Impact" />
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ fontWeight: 600 }}
+                sx={{ fontWeight: 600, fontFamily: "Inter" }}
               >
                 Health Impact
               </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="#000000" fontFamily="Inter">
               {activeParticle.healthImpact}
             </Typography>
           </Paper>
@@ -315,39 +362,6 @@ const ExaminePage = () => {
           zIndex: 20,
         }}
       />
-      <Fab
-        color="success"
-        aria-label="Go back"
-        onClick={handleNavigatePrevious}
-        sx={{
-          position: "absolute",
-          top: 24,
-          left: 24,
-          width: 72,
-          height: 72,
-          backgroundColor: "#FFD400",
-          "&:hover": { backgroundColor: "#FFE254" },
-        }}
-      >
-        <ArrowBackIcon sx={{ fontSize: 36, color: "#000000" }} />
-      </Fab>
-
-      <Fab
-        color="success"
-        aria-label="Show results"
-        onClick={handleNavigateNext}
-        sx={{
-          position: "absolute",
-          top: 24,
-          right: 24,
-          width: 72,
-          height: 72,
-          backgroundColor: "#FFD400",
-          "&:hover": { backgroundColor: "#FFE254" },
-        }}
-      >
-        <ArrowForward sx={{ fontSize: 36, color: "#000000" }} />
-      </Fab>
     </Box>
   );
 };

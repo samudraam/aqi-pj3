@@ -64,7 +64,7 @@ const MistPage = () => {
           justifyContent: "center",
         }}
       >
-        <ProcessingHeader currentStep={0} prevRoute="/" nextRoute="/aqi" />
+        <ProcessingHeader currentStep={0} prevRoute="/" nextRoute="/examine" />
       </Box>
       <Box
         sx={{

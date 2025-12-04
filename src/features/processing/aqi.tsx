@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Fab, Typography, Button } from "@mui/material";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Box, Typography, Button } from "@mui/material";
 import { useCity } from "../../providers/use-city";
-import Timeline from "../../components/timeline";
 import { AqiSlider } from "../../components/aqi-slider";
-
+import ProcessingHeader from "../../components/processing-header";
 /**
  * Factors that affect AQI
  */
@@ -48,20 +45,6 @@ const AqiPage = () => {
   }, [airQualityDetails, navigate]);
 
   /**
-   * Handles navigation to the previous page
-   */
-  const handleNavigatePrevious = useCallback(() => {
-    navigate("/examine");
-  }, [navigate]);
-
-  /**
-   * Handles navigation to the next page
-   */
-  const handleNavigateNext = useCallback(() => {
-    navigate("/particles-debug");
-  }, [navigate]);
-
-  /**
    * Handles factor button click
    */
   const handleFactorClick = useCallback((factorId: FactorId) => {
@@ -87,44 +70,17 @@ const AqiPage = () => {
         flexDirection: "column",
       }}
     >
-      <Timeline currentStep="aqi" />
-
-      {/* Navigation Buttons */}
-      <Fab
-        color="success"
-        aria-label="Go back"
-        onClick={handleNavigatePrevious}
+      <Box
         sx={{
-          position: "absolute",
-          top: 24,
-          left: 24,
-          width: 72,
-          height: 72,
-          backgroundColor: "#FFD400",
-          "&:hover": { backgroundColor: "#FFE254" },
-          zIndex: 1101,
+          position: "relative",
+          zIndex: 210,
+          display: "flex",
+          justifyContent: "center",
         }}
       >
-        <ArrowBackIcon sx={{ fontSize: 36, color: "#000000" }} />
-      </Fab>
-
-      <Fab
-        color="success"
-        aria-label="Go forward"
-        onClick={handleNavigateNext}
-        sx={{
-          position: "absolute",
-          top: 24,
-          right: 24,
-          width: 72,
-          height: 72,
-          backgroundColor: "#FFD400",
-          "&:hover": { backgroundColor: "#FFE254" },
-          zIndex: 1101,
-        }}
-      >
-        <ArrowForwardIcon sx={{ fontSize: 36, color: "#000000" }} />
-      </Fab>
+        <ProcessingHeader currentStep={1} prevRoute="/mist" nextRoute="/examine" />
+      </Box>
+      
 
       {/* Main Content */}
       <Box
@@ -146,7 +102,7 @@ const AqiPage = () => {
         <Typography
           component="h1"
           sx={{
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "Raleway, sans-serif",
             fontSize: { xs: "1.75rem", sm: "2.25rem", md: "3rem" },
             fontWeight: 400,
             color: "#000000",
@@ -158,7 +114,7 @@ const AqiPage = () => {
           <Typography
             component="span"
             sx={{
-              fontFamily: "Inter, sans-serif",
+              fontFamily: "Raleway, sans-serif",
               fontSize: { xs: "1.75rem", sm: "2.25rem", md: "3rem" },
               fontWeight: 600,
               fontStyle: "italic",
@@ -174,13 +130,12 @@ const AqiPage = () => {
         <Typography
           component="p"
           sx={{
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "Raleway, sans-serif",
             fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
             fontWeight: 400,
             color: "#000000",
             textAlign: "left",
-            lineHeight: 1.5,
-            maxWidth: "900px",
+            marginRight: 10,
           }}
         >
           The concentration of the 5 major pollutants are rated on a scale from
@@ -211,7 +166,7 @@ const AqiPage = () => {
               sx={{
                 fontFamily: "Inter, sans-serif",
                 fontSize: { xs: "0.875rem", sm: "1rem" },
-                fontWeight: 500,
+                fontWeight: 600,
                 color: "#000000",
               }}
             >
@@ -221,7 +176,7 @@ const AqiPage = () => {
               sx={{
                 fontFamily: "Inter, sans-serif",
                 fontSize: { xs: "0.875rem", sm: "1rem" },
-                fontWeight: 500,
+                fontWeight: 600,
                 color: "#000000",
               }}
             >
@@ -230,7 +185,7 @@ const AqiPage = () => {
           </Box>
 
           {/* AQI Slider Component */}
-          <AqiSlider aqi={aqiValue} width="100%" />
+          <AqiSlider aqi={aqiValue} showLabels={false} width="100%" />
 
           {/* Numerical Ratings */}
           <Box
@@ -238,29 +193,28 @@ const AqiPage = () => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              paddingX: 0.5,
               marginTop: 1,
             }}
           >
             {[
-              { level: 1 },
-              { level: 2 },
-              { level: 3 },
-              { level: 4 },
-              { level: 5 },
-            ].map(({ level }) => (
+              { level: 1, label: "Good" },
+              { level: 2, label: "Fair" },
+              { level: 3, label: "Moderate" },
+              { level: 4, label: "Poor" },
+              { level: 5, label: "Very Poor" },
+            ].map(({ level, label }) => (
               <Typography
                 key={level}
                 sx={{
                   fontFamily: "Inter, sans-serif",
-                  fontSize: { xs: "0.75rem", sm: "0.875rem", md: "1rem" },
+                  fontSize: { xs: "0.75rem", sm: "0.875rem", md: "1.25rem" },
                   fontWeight: 600,
                   color: "#000000",
                   textAlign: "center",
                   flex: 1,
                 }}
               >
-                {level}
+                {level} <span style={{ fontSize: "0.75rem",fontWeight: 500, marginLeft: 3 }}>{label}</span>
               </Typography>
             ))}
           </Box>
@@ -284,7 +238,7 @@ const AqiPage = () => {
               fontSize: { xs: "1.25rem", sm: "1.5rem", md: "1.75rem" },
               fontWeight: 600,
               color: "#000000",
-              textAlign: "center",
+              textAlign: "left",
             }}
           >
             Factors that affect AQI
@@ -295,7 +249,7 @@ const AqiPage = () => {
             sx={{
               display: "flex",
               flexWrap: "wrap",
-              gap: { xs: 1.5, sm: 2 },
+              gap: { xs: 1.5, sm: 3.5 },
               justifyContent: "center",
               alignItems: "center",
             }}

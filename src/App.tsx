@@ -10,6 +10,7 @@ import MorePage from "./features/processing/more";
 import { OptimizedDebugParticlesOnly } from "./features/processing/optimized-particles-debug";
 import ParticleView from "./features/processing/oldsketches/particleView";
 import ConclusionPage from "./features/processing/conclusion";
+import DiscoverSummaryPage from "./features/processing/discoverSummary";
 /**
  * Application routing and providers.
  */
@@ -23,6 +24,7 @@ const App = () => (
         <Route path="/aqi" element={<AqiPage />} />
         <Route path="/examine" element={<ExaminePage />} />
         <Route path="/more" element={<MorePage />} />
+        <Route path="/discover-summary" element={<DiscoverSummaryPage />} />
         <Route
           path="/particles-debug"
           element={<OptimizedDebugParticlesOnly />}

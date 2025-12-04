@@ -9,40 +9,40 @@ const AQI_SEGMENTS = [
     level: 1,
     label: "Good",
     colors: {
-      start: "#ADFF2F", // Bright lime green
-      end: "#9ACD32", // Yellowish-green/olive
+      start: "#017201",
+      end: "#017201",
     },
   },
   {
     level: 2,
     label: "Fair",
     colors: {
-      start: "#DAA520", // Yellowish-brown/gold
-      end: "#CD853F", // Warm orange/terracotta
+      start: "#D1CD00",
+      end: "#D1CD00",
     },
   },
   {
     level: 3,
     label: "Moderate",
     colors: {
-      start: "#FF4500", // Bright orange-red
-      end: "#FF0000", // Pure red
+      start: "#D76A00",
+      end: "#D76A00",
     },
   },
   {
     level: 4,
     label: "Poor",
     colors: {
-      start: "#DC143C", // Deep red/crimson
-      end: "#FF1493", // Dark magenta/fuchsia
+      start: "#DE2202",
+      end: "#DE2202",
     },
   },
   {
     level: 5,
     label: "Very Poor",
     colors: {
-      start: "#8B008B", // Dark magenta
-      end: "#4B0082", // Royal purple/indigo
+      start: "#6C0C1B",
+      end: "#6C0C1B",
     },
   },
 ] as const;
@@ -56,6 +56,11 @@ interface AqiSliderProps {
    * Optional custom width for the slider
    */
   width?: string | number;
+  /**
+   * Whether to show labels and arrows under each segment
+   * @default true
+   */
+  showLabels?: boolean;
 }
 
 /**
@@ -63,7 +68,11 @@ interface AqiSliderProps {
  * Displays a horizontal color gradient slider representing AQI levels (1-5)
  * with arrows underneath each segment and an indicator for the current AQI value
  */
-export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
+export const AqiSlider = ({
+  aqi,
+  width = "100%",
+  showLabels = true,
+}: AqiSliderProps) => {
   const maxWidth = typeof width === "number" ? `${width}px` : width;
   const currentAqi = aqi ?? null;
   const currentLevel =
@@ -111,8 +120,6 @@ export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
               width: `${segmentPercent}%`,
               height: "100%",
               background: `linear-gradient(to right, ${segment.colors.start}, ${segment.colors.end})`,
-              borderRight:
-                index < AQI_SEGMENTS.length - 1 ? "2px solid #000000" : "none",
             }}
           />
         ))}
@@ -132,8 +139,14 @@ export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
               sx={{
                 width: 0,
                 height: 0,
-                borderLeft: { xs: "5px solid transparent", md: "6px solid transparent" },
-                borderRight: { xs: "5px solid transparent", md: "6px solid transparent" },
+                borderLeft: {
+                  xs: "5px solid transparent",
+                  md: "6px solid transparent",
+                },
+                borderRight: {
+                  xs: "5px solid transparent",
+                  md: "6px solid transparent",
+                },
                 borderTop: { xs: "7px solid #000000", md: "8px solid #000000" },
               }}
             />
@@ -142,77 +155,85 @@ export const AqiSlider = ({ aqi, width = "100%" }: AqiSliderProps) => {
       </Box>
 
       {/* Arrow Indicators Under Each Segment */}
-      <Box
-        sx={{
-          display: "flex",
-          width: "100%",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          paddingX: "2px",
-        }}
-      >
-        {AQI_SEGMENTS.map((segment) => {
-          const isActive = currentLevel === segment.level;
-          return (
-            <Box
-              key={segment.level}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                flex: 1,
-                gap: "0.25rem",
-              }}
-            >
-              {/* Arrow pointing up */}
+      {showLabels && (
+        <Box
+          sx={{
+            display: "flex",
+            width: "100%",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            paddingX: "2px",
+          }}
+        >
+          {AQI_SEGMENTS.map((segment) => {
+            const isActive = currentLevel === segment.level;
+            return (
               <Box
+                key={segment.level}
                 sx={{
-                  width: 0,
-                  height: 0,
-                  borderLeft: { xs: "3px solid transparent", md: "4px solid transparent" },
-                  borderRight: { xs: "3px solid transparent", md: "4px solid transparent" },
-                  borderBottom: {
-                    xs: `5px solid ${
-                      isActive ? "#000000" : "rgba(0, 0, 0, 0.3)"
-                    }`,
-                    md: `6px solid ${
-                      isActive ? "#000000" : "rgba(0, 0, 0, 0.3)"
-                    }`,
-                  },
-                  transition: "border-bottom-color 0.2s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  flex: 1,
+                  gap: "0.25rem",
                 }}
-              />
-              {/* Label */}
-              {isActive ? (
-                <Chip
-                  label={segment.label}
-                  size="small"
+              >
+                {/* Arrow pointing up */}
+                <Box
                   sx={{
-                    fontSize: "0.7rem",
-                    fontWeight: 800,
-                    backgroundColor: "#ffd400",
-                    border: "1px solid rgba(0, 0, 0, 0.2)",
-                    color: "#000000",
+                    width: 0,
+                    height: 0,
+                    borderLeft: {
+                      xs: "3px solid transparent",
+                      md: "4px solid transparent",
+                    },
+                    borderRight: {
+                      xs: "3px solid transparent",
+                      md: "4px solid transparent",
+                    },
+                    borderBottom: {
+                      xs: `5px solid ${
+                        isActive ? "#000000" : "rgba(0, 0, 0, 0.3)"
+                      }`,
+                      md: `6px solid ${
+                        isActive ? "#000000" : "rgba(0, 0, 0, 0.3)"
+                      }`,
+                    },
+                    transition: "border-bottom-color 0.2s ease",
                   }}
                 />
-              ) : (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontSize: "0.7rem",
-                    fontWeight: 400,
-                    color: "rgba(0, 0, 0, 0.6)",
-                    textAlign: "center",
-                    transition: "all 0.2s ease",
-                  }}
-                >
-                  {segment.label}
-                </Typography>
-              )}
-            </Box>
-          );
-        })}
-      </Box>
+                {/* Label */}
+                {isActive ? (
+                  <Chip
+                    label={segment.label}
+                    size="small"
+                    sx={{
+                      fontSize: "0.7rem",
+                      fontWeight: 800,
+                      backgroundColor: "#ffd400",
+                      border: "1px solid rgba(0, 0, 0, 0.2)",
+                      color: "#000000",
+                    }}
+                  />
+                ) : (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontSize: "0.7rem",
+                      fontWeight: 400,
+                      color: "rgba(0, 0, 0, 0.6)",
+                      textAlign: "center",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {segment.label}
+                  </Typography>
+                )}
+              </Box>
+            );
+          })}
+        </Box>
+      )}
     </Box>
   );
 };
